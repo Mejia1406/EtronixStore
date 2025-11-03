@@ -1,5 +1,22 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-html, body, #root { height: 100%; }
+@layer base {
+  html {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  body {
+    background-color: #f6f6f8;
+    color: #0d101b;
+  }
+
+  .dark body {
+    background-color: #101322;
+    color: #f6f6f8;
+  }
+}
+
+/* Material Icons */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

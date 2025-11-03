@@ -14,6 +14,6 @@ const PRODUCTS = [
   await connectDB(process.env.MONGODB_URI);
   await Product.deleteMany({});
   await Product.insertMany(PRODUCTS);
-  console.log("✅ Seed listo");
+  console.log("Seed listo");
   process.exit(0);
 })();

@@ -5,10 +5,15 @@ import App from "./App.jsx";
 import Success from "./pages/Success.jsx";
 import Failure from "./pages/Failure.jsx";
 import Pending from "./pages/Pending.jsx";
+import Admin from "./pages/Admin.jsx";
+import Home from "./pages/Home.jsx";
+import Shop from "./pages/Shop.jsx";
 import "./index.css";
 
 const router = createBrowserRouter([
-  { path: "/", element: <App /> },
+  { path: "/", element: <Home /> },
+  { path: "/shop", element: <Shop /> },
+  { path: "/admin", element: <Admin /> },
   { path: "/success", element: <Success /> },
   { path: "/failure", element: <Failure /> },
   { path: "/pending", element: <Pending /> },

@@ -15,18 +15,18 @@ const app = express();
 app.use(express.json());
 
 // --- Logs de entorno útiles ---
-console.log("✅ Backend env loaded");
-console.log("⚙️ FRONTEND_URL:", process.env.FRONTEND_URL);
-console.log("⚙️ BACKEND_PUBLIC_URL:", process.env.BACKEND_PUBLIC_URL || "(not set)");
-console.log("⚙️ MP token prefix:", (process.env.MP_ACCESS_TOKEN || "").slice(0, 5));
+console.log("Backend env loaded");
+console.log("FRONTEND_URL:", process.env.FRONTEND_URL);
+console.log("BACKEND_PUBLIC_URL:", process.env.BACKEND_PUBLIC_URL || "(not set)");
+console.log("MP token:", (process.env.MP_ACCESS_TOKEN || "").slice(0, 5));
 
 // --- DB ---
 (async () => {
   try {
     await connectDB(process.env.MONGODB_URI);
-    console.log("✅ MongoDB conectado");
+    console.log("MongoDB conectado");
   } catch (err) {
-    console.error("❌ Error conectando MongoDB:", err);
+    console.error("Error conectando MongoDB:", err);
     process.exit(1);
   }
 })();
@@ -82,9 +82,9 @@ async function processMerchantOrder(moData) {
     order.mp_payment_id = approved?.id?.toString() || order.mp_payment_id;
     await order.save();
     await decreaseStock(order);
-    console.log(`✅ Orden ${order._id} marcada como PAID y stock actualizado`);
+    console.log(`Orden ${order._id} marcada como PAID y stock actualizado`);
   } else {
-    console.log(`ℹ️ Orden ${order._id} aún no pagada (status: ${order.status})`);
+    console.log(`Orden ${order._id} aún no pagada (status: ${order.status})`);
   }
 }
 
@@ -184,7 +184,7 @@ app.all("/api/payments/webhook", async (req, res) => {
     const notifType = type || topic;     // 'payment' o 'merchant_order'
     const notifId = dataId || id;        // id de payment u order
 
-    console.log("🔎 Webhook params:", req.query);
+    console.log("Webhook params:", req.query);
 
     if (notifType === "payment" && notifId) {
       const paymentClient = new Payment(client);
@@ -217,8 +217,27 @@ app.get("/api/orders/:id", async (req, res) => {
   res.json(order);
 });
 
+// --- Listar todas las órdenes (para admin) --- 
+app.get("/api/orders", async (_req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate({
+        path: "items.productId",
+        options: { strictPopulate: false }
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    res.json(orders);
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+    res.status(500).json({ error: "Error al obtener órdenes" });
+  }
+});
+
+
 // --- Server ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ Backend en http://localhost:${PORT}`);
+  console.log(`Backend en http://localhost:${PORT}`);
 });

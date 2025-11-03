@@ -4,5 +4,5 @@ export async function connectDB(uri) {
   if (!uri) throw new Error("Missing MONGODB_URI");
   mongoose.set("strictQuery", true);
   await mongoose.connect(uri);
-  console.log("✅ MongoDB conectado");
+  console.log("MongoDB conectado");
 }
