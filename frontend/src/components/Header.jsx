@@ -79,8 +79,8 @@ export default function Header({ cartCount: cartCountProp, onToggleSidebar, onTo
             </button>
 
             {/* Botón WhatsApp - Corporativo */}
-            <a
-              href="https://wa.me/573001234567"
+            <a 
+              href="https://wa.me/573207208410"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium text-sm shadow-sm"

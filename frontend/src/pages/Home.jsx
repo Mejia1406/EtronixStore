@@ -140,7 +140,7 @@ export default function Home() {
                 </Link>
                 
                 <a
-                  href="https://wa.me/573001234567"
+                  href="https://wa.me/573207208410"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Abrir WhatsApp para asesoría"

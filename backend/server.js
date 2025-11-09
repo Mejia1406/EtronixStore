@@ -1,5 +1,6 @@
 // server.js
 import express from "express";
+import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -131,6 +132,42 @@ async function validateStock(items) {
   return stockErrors;
 }
 
+// --- Normalizar items con datos del servidor (precio y título) ---
+async function normalizeItemsFromDB(items) {
+  const ids = items
+    .map((i) => i.productId || i._id)
+    .filter(Boolean)
+    .map(String);
+
+  if (!ids.length) {
+    throw new AppError("Items inválidos: faltan productId", 400);
+  }
+
+  const products = await Product.find({ _id: { $in: ids } }).lean();
+  const map = new Map(products.map((p) => [String(p._id), p]));
+
+  const normalized = items.map((i) => {
+    const key = String(i.productId || i._id);
+    const prod = map.get(key);
+    if (!prod) {
+      throw new NotFoundError("Producto");
+    }
+    return {
+      productId: prod._id,
+      title: prod.title,
+      quantity: Number(i.quantity || 1),
+      unit_price: Number(prod.price),
+    };
+  });
+
+  const total = normalized.reduce(
+    (acc, it) => acc + Number(it.unit_price) * Number(it.quantity),
+    0
+  );
+
+  return { items: normalized, total };
+}
+
 // --- Productos ---
 app.get("/api/products", asyncHandler(async (_req, res) => {
   const items = await Product.find().sort({ createdAt: -1 });
@@ -145,6 +182,39 @@ async function decreaseStock(order) {
       { _id: item.productId },
       { $inc: { stock: -Number(item.quantity || 1) } }
     );
+  }
+}
+
+// --- Disminuir stock de forma atómica y segura ---
+async function decreaseStockAtomic(order, session) {
+  const updated = [];
+  try {
+    for (const item of order.items) {
+      const qty = Number(item.quantity || 1);
+      if (!item?.productId || qty <= 0) continue;
+
+      const res = await Product.updateOne(
+        { _id: item.productId, stock: { $gte: qty } },
+        { $inc: { stock: -qty } },
+        { session }
+      );
+
+      if (res.modifiedCount !== 1) {
+        throw new InsufficientStockError(`Producto ${item.productId}`, "?", qty);
+      }
+      updated.push({ id: item.productId, qty });
+    }
+  } catch (err) {
+    // Si no hay sesión (sin transacción), intentamos revertir manualmente
+    if (!session) {
+      for (const u of updated) {
+        await Product.updateOne(
+          { _id: u.id },
+          { $inc: { stock: u.qty } }
+        );
+      }
+    }
+    throw err;
   }
 }
 
@@ -192,22 +262,35 @@ async function processMerchantOrder(moData, notificationId = null) {
   }
 
   if (paid && order.status !== "paid") {
-    const approved = moData.payments.find((p) => p.status === "approved");
-    order.status = "paid";
-    order.mp_payment_id = approved?.id?.toString() || order.mp_payment_id;
-    await order.save();
-    await decreaseStock(order);
-    
-    logger.info(`Orden ${order._id} marcada como PAID y stock actualizado`);
-    
-    // Registrar evento como procesado
-    if (notificationId) {
-      await ProcessedEvent.create({
-        notificationId: String(notificationId),
-        notificationType: "merchant_order",
-        orderId: String(order._id),
-        status: "paid",
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        const approved = moData.payments.find((p) => p.status === "approved");
+        const fresh = await Order.findById(order._id).session(session);
+        if (!fresh) return;
+        if (fresh.status === "paid") return; // idempotencia
+
+        fresh.status = "paid";
+        fresh.mp_payment_id = approved?.id?.toString() || fresh.mp_payment_id;
+        await fresh.save({ session });
+
+        await decreaseStockAtomic(fresh, session);
+
+        // Registrar evento como procesado dentro de la transacción
+        if (notificationId) {
+          await ProcessedEvent.create([
+            {
+              notificationId: String(notificationId),
+              notificationType: "merchant_order",
+              orderId: String(fresh._id),
+              status: "paid",
+            },
+          ], { session });
+        }
       });
+      logger.info(`Orden ${order._id} marcada como PAID y stock actualizado (atómico)`);
+    } finally {
+      session.endSession();
     }
   } else {
     logger.info(`Orden ${order._id} - Status actual: ${order.status}`);
@@ -227,13 +310,11 @@ app.post("/api/payments/preference", paymentLimiter, validate(createOrderSchema)
     );
   }
 
-  const total = items.reduce(
-    (acc, i) => acc + Number(i.unit_price) * Number(i.quantity || 1),
-    0
-  );
+  // Recalcular precios y totales desde la BD (no confiamos en el cliente)
+  const { items: normalizedItems, total } = await normalizeItemsFromDB(items);
 
   const order = await Order.create({
-    items,
+    items: normalizedItems,
     buyer,
     total,
     status: "pending",
@@ -248,7 +329,7 @@ app.post("/api/payments/preference", paymentLimiter, validate(createOrderSchema)
   const backendBase = String(backendBaseRaw).trim().replace(/\/$/, "");
 
   const preferenceBody = {
-    items: items.map((i) => ({
+    items: normalizedItems.map((i) => ({
       title: i.title,
       quantity: Number(i.quantity || 1),
       currency_id: "COP",
@@ -298,7 +379,7 @@ app.post("/api/payments/preference", paymentLimiter, validate(createOrderSchema)
 
 // --- Procesar pago directo (Checkout Bricks) ---
 app.post("/api/payments/process", paymentLimiter, asyncHandler(async (req, res) => {
-  const { token, items, buyer, transaction_amount, description, payment_method_id, issuer_id, payer, installments } = req.body;
+  const { token, items, buyer, description, payment_method_id, issuer_id, payer, installments } = req.body;
 
   logger.info("Datos recibidos en /api/payments/process:", {
     has_token: !!token,
@@ -306,7 +387,7 @@ app.post("/api/payments/process", paymentLimiter, asyncHandler(async (req, res) 
     has_buyer: !!buyer,
     payment_method_id,
     issuer_id,
-    transaction_amount,
+    client_amount: req.body?.transaction_amount,
     payer_email: payer?.email
   });
 
@@ -331,21 +412,13 @@ app.post("/api/payments/process", paymentLimiter, asyncHandler(async (req, res) 
     );
   }
 
-  // Calcular el total esperado
-  const expectedTotal = items.reduce(
-    (acc, i) => acc + Number(i.unit_price || i.price) * Number(i.quantity || 1),
-    0
-  );
-
-  // Validar que el monto coincida
-  if (Math.abs(transaction_amount - expectedTotal) > 0.01) {
-    throw new AppError("El monto no coincide con el total de los productos", 400);
-  }
+  // Recalcular total e items desde la BD para garantizar integridad
+  const { items: normalizedItems, total: expectedTotal } = await normalizeItemsFromDB(items);
 
   const paymentClient = new Payment(client);
   
   const paymentData = {
-    transaction_amount: Number(transaction_amount),
+    transaction_amount: Number(expectedTotal),
     description: description || `Compra en Etronix Store`,
     payment_method_id: payment_method_id,
     installments: Number(installments) || 1,
@@ -378,7 +451,7 @@ app.post("/api/payments/process", paymentLimiter, asyncHandler(async (req, res) 
   }
 
   logger.info(`Procesando pago con MercadoPago`, { 
-    amount: transaction_amount, 
+    amount: expectedTotal, 
     email: payer?.email || buyer.email,
     payment_method: payment_method_id,
     has_token: !!token,
@@ -391,28 +464,34 @@ app.post("/api/payments/process", paymentLimiter, asyncHandler(async (req, res) 
   logger.info(`Pago creado: ${paymentBody.id}, status: ${paymentBody.status}, detail: ${paymentBody.status_detail}`);
 
   if (paymentBody.status === "approved") {
-    // CREAR LA ORDEN SOLO SI EL PAGO FUE APROBADO
-    const order = await Order.create({
-      items: items.map(item => ({
-        productId: item.productId || item._id,
-        title: item.title,
-        quantity: item.quantity,
-        unit_price: item.unit_price || item.price
-      })),
-      buyer,
-      total: expectedTotal,
-      status: "paid",
-      mp_payment_id: String(paymentBody.id)
-    });
+    // CREAR LA ORDEN SOLO SI EL PAGO FUE APROBADO, usando transacción para stock
+    const session = await mongoose.startSession();
+    let newOrder;
+    try {
+      await session.withTransaction(async () => {
+        newOrder = new Order({
+          items: normalizedItems,
+          buyer,
+          total: expectedTotal,
+          status: "paid",
+          mp_payment_id: String(paymentBody.id)
+        });
+        await newOrder.save({ session });
+        await decreaseStockAtomic(newOrder, session);
+      });
+    } catch (err) {
+      logger.error("Error transaccional creando orden pagada:", { message: err.message });
+      throw err;
+    } finally {
+      session.endSession();
+    }
 
-    await decreaseStock(order);
-    
-    logger.info(`Orden ${order._id} creada con status PAID`);
+    logger.info(`Orden ${newOrder._id} creada con status PAID (stock descontado atómicamente)`);
     
     return res.json({
       success: true,
       status: "approved",
-      orderId: order._id,
+      orderId: newOrder._id,
       paymentId: paymentBody.id
     });
   } else if (paymentBody.status === "rejected") {

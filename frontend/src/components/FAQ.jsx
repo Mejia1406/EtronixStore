@@ -86,7 +86,7 @@ export default function FAQ() {
       questions: [
         {
           q: "¿Cómo puedo contactarlos?",
-          a: "Puedes contactarnos por WhatsApp al +57 300 123 4567. También puedes usar nuestro chatbot en la esquina inferior derecha para preguntas rápidas."
+          a: "Puedes contactarnos por WhatsApp al +57 320 7208410. También puedes usar nuestro chatbot en la esquina inferior derecha para preguntas rápidas."
         },
         {
           q: "¿Cuál es el horario de atención?",
@@ -178,7 +178,7 @@ export default function FAQ() {
             Nuestro equipo está listo para ayudarte. Contáctanos por WhatsApp y resolveremos todas tus inquietudes.
           </p>
           <a
-            href="https://wa.me/573001234567?text=Hola,%20tengo%20una%20pregunta"
+            href="https://wa.me/573207208410?text=Hola,%20tengo%20una%20pregunta"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 bg-green-500 text-white px-8 py-4 rounded-lg font-bold hover:bg-green-600 transition-colors"

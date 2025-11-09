@@ -52,7 +52,7 @@ export default function Chatbot() {
     },
     whatsapp: {
       keywords: ["whatsapp", "contacto", "teléfono", "telefono", "llamar", "número", "numero", "asesor"],
-      response: "📱 Contacto Directo:\n\n¿Necesitas hablar con un asesor?\n\nContáctanos por WhatsApp:\n+57 300 123 4567\n\nNuestros asesores te atenderán con gusto en el horario de atención. También puedes dejarnos un mensaje y te responderemos lo antes posible."
+      response: "📱 Contacto Directo:\n\n¿Necesitas hablar con un asesor?\n\nContáctanos por WhatsApp:\n+57 320 7208410\n\nNuestros asesores te atenderán con gusto en el horario de atención. También puedes dejarnos un mensaje y te responderemos lo antes posible."
     },
     seguimiento: {
       keywords: ["seguimiento", "rastreo", "pedido", "orden", "compra", "estado"],
@@ -84,7 +84,7 @@ export default function Chatbot() {
     }
 
     // Si no encuentra una coincidencia específica
-    return "🤔 Disculpa, no estoy seguro de entender tu pregunta.\n\nPuedo ayudarte con:\n\n• Información de productos\n• Métodos de pago\n• Envíos y entregas\n• Garantías\n• Seguimiento de pedidos\n\nTambién puedes contactar a un asesor por WhatsApp: +57 300 123 4567";
+    return "🤔 Disculpa, no estoy seguro de entender tu pregunta.\n\nPuedo ayudarte con:\n\n• Información de productos\n• Métodos de pago\n• Envíos y entregas\n• Garantías\n• Seguimiento de pedidos\n\nTambién puedes contactar a un asesor por WhatsApp: +57 320 7208410";
   };
 
   const quickQuestions = [

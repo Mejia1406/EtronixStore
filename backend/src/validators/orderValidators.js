@@ -8,7 +8,8 @@ export const createOrderSchema = Joi.object({
         productId: Joi.string().length(24).optional(),
         title: Joi.string().required().min(1).max(200),
         quantity: Joi.number().integer().min(1).max(999).required(),
-        unit_price: Joi.number().positive().required(),
+        // El precio lo recalcula el servidor desde la BD; no confiamos en el cliente
+        unit_price: Joi.number().positive().optional(),
         image: Joi.string().uri().optional(),
       })
     )

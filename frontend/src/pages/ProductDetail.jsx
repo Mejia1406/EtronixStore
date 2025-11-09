@@ -232,7 +232,7 @@ export default function ProductDetail() {
                   Contáctanos por WhatsApp y te respondemos en minutos
                 </p>
                 <a 
-                  href="https://wa.me/573001234567?text=Hola,%20tengo%20una%20pregunta%20sobre%20este%20producto"
+                  href="https://wa.me/573207208410?text=Hola,%20tengo%20una%20pregunta%20sobre%20este%20producto"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 mt-4 bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors"
