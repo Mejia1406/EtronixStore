@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
+import LightRays from "../components/LightRays";
 const FAQ = lazy(() => import("../components/FAQ"));
 
-// Usa tu imagen de héroe real (mockup del celular). Si no tienes aún, temporalmente usa el logo
 import hero from "../assets/LogoEtronixBordesRedondos.svg";
 
 export default function Home() {
@@ -25,7 +25,6 @@ export default function Home() {
     })();
   }, []);
 
-  // Etiquetas tipo template (si tu API trae tags/flags, cámbialo a product.tag)
   const badges = ["BEST", "NEW", "SALE", "HOT", "NEW"];
 
   return (
@@ -58,92 +57,114 @@ export default function Home() {
         <link rel="canonical" href="https://etronix-store.com/" />
       </Helmet>
 
-      <main className="min-h-screen bg-white">
-        {/* ---------- HERO (estilo referencia: texto izq, imagen der) ---------- */}
+      {/* === Fondo LightRays: ocupa toda la pantalla === */}
+      <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#00d4ff"
+          raysSpeed={1.5}
+          lightSpread={0.9}
+          rayLength={1.2}
+          followMouse
+          mouseInfluence={0.12}
+          noiseAmount={0.06}
+          distortion={0.03}
+          className="w-full h-full pointer-events-none opacity-70"
+        />
+      </div>
+
+      <main className="relative min-h-screen z-10">
+        {/* ---------- HERO ---------- */}
         <section className="relative">
-          {/* fondo limpio con ligera sombra superior */}
-          <div className="absolute inset-x-0 top-0 h-10 bg-linear-to-b from-black/5 to-transparent pointer-events-none" />
-          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14 lg:py-20">
-            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-16 lg:py-24">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
               {/* Texto */}
               <div className="order-2 lg:order-1">
-                <p className="text-[12px] tracking-[0.2em] font-semibold text-slate-500 uppercase">
-                  Renovar
-                </p>
-                <h1 className="mt-3 text-4xl lg:text-6xl font-black leading-[1.05] text-[#1A1A1A]">
-                  Actualiza tu{" "}
-                  <span className="text-[#0056D2]">mundo móvil</span>
-                </h1>
-                <p className="mt-4 text-slate-600 text-lg max-w-xl">
-                  Calidad real, envíos rápidos y pagos seguros. Celulares, cargadores, cables y más para tu día a día.
-                </p>
+                <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-3xl p-8 lg:p-10 border border-white/20 shadow-2xl">
+                  <h1 className="text-4xl lg:text-6xl font-black leading-[1.05] text-white mb-5">
+                    Actualiza tu{" "}
+                    <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                      mundo móvil
+                    </span>
+                  </h1>
+                  <p className="text-gray-200 text-lg leading-relaxed mb-8">
+                    Calidad real, envíos rápidos y pagos seguros. Celulares, cargadores, cables y más para tu día a día.
+                  </p>
 
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link
-                    to="/shop"
-                    className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-white font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md bg-[#007BFF] hover:bg-[#006AE6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#007BFF]"
-                  >
-                    Explorar ahora
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </Link>
+                  <div className="flex flex-wrap gap-4">
+                    <Link
+                      to="/shop"
+                      className="inline-flex items-center gap-2 rounded-xl px-7 py-4 text-gray-900 font-bold shadow-lg transition-all hover:-translate-y-1 hover:shadow-cyan-500/50 bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400"
+                    >
+                      Explorar ahora
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </Link>
 
-                  <Link
-                    to="/offers"
-                    className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold shadow-sm transition-all hover:-translate-y-0.5 border border-slate-200 text-[#1A1A1A] bg-white hover:bg-slate-50"
-                  >
-                    Ver ofertas
-                  </Link>
+                    <Link
+                      to="/offers"
+                      className="inline-flex items-center gap-2 rounded-xl px-7 py-4 font-bold shadow-lg transition-all hover:-translate-y-1 border-2 border-white/30 text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm hover:border-cyan-400/50"
+                    >
+                      Ver ofertas
+                    </Link>
+                  </div>
                 </div>
               </div>
 
               {/* Imagen producto / mockup */}
               <div className="order-1 lg:order-2">
                 <div className="relative">
-                  {/* “pedestal” minimal */}
-                  <div className="absolute -inset-x-6 -bottom-8 h-40 bg-white/80 rounded-4xl shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] -z-10" />
-                  <img
-                    src={hero}
-                    alt="Hero Etronix"
-                    className="w-full h-auto rounded-[1.25rem] object-contain"
-                    loading="eager"
-                    decoding="async"
-                    fetchPriority="high"
-                  />
+                  {/* Glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-3xl blur-3xl" />
+                  <div className="relative backdrop-blur-sm bg-white/10 rounded-3xl p-8 border border-white/20 shadow-2xl overflow-visible">
+                    <div className="overflow-visible flex items-center justify-center -m-12">
+                      <img
+                        src={hero}
+                        alt="Hero Etronix"
+                        className="w-full h-auto rounded-2xl object-contain drop-shadow-2xl scale-95"
+                        loading="eager"
+                        decoding="async"
+                        fetchPriority="high"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
+
             </div>
           </div>
         </section>
 
-        {/* ---------- FEATURED STRIP (fila de tarjetas al estilo referencia) ---------- */}
+        {/* ---------- FEATURED PRODUCTS ---------- */}
         <section className="pb-20">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-6">
+            {/* Header */}
+            <div className="flex items-end justify-between mb-8">
               <div>
-                <p className="text-[12px] tracking-[0.2em] font-semibold text-slate-500 uppercase">
+                <h2 className="text-3xl lg:text-4xl font-black text-white">
                   Destacados
-                </p>
-                <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1A1A1A]">
-                  Lo mejor para empezar
                 </h2>
               </div>
               <Link
                 to="/shop"
-                className="hidden md:inline-flex text-sm font-semibold text-[#0056D2] hover:underline"
+                className="hidden md:inline-flex items-center gap-1 text-sm font-bold text-cyan-400 hover:text-cyan-300 transition-colors"
               >
                 Ver todo
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             </div>
 
+            {/* Grid de productos */}
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-                    <div className="aspect-4/5 bg-slate-100 rounded-xl mb-3" />
-                    <div className="h-4 w-3/4 bg-slate-100 rounded mb-2" />
-                    <div className="h-4 w-1/2 bg-slate-100 rounded" />
+                  <div key={i} className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-4 shadow-lg animate-pulse">
+                    <div className="aspect-4/5 bg-white/10 rounded-xl mb-3" />
+                    <div className="h-4 w-3/4 bg-white/10 rounded mb-2" />
+                    <div className="h-4 w-1/2 bg-white/10 rounded" />
                   </div>
                 ))}
               </div>
@@ -152,39 +173,40 @@ export default function Home() {
                 {featuredProducts.map((p, idx) => (
                   <article
                     key={p._id || idx}
-                    className="group relative rounded-2xl bg-white border border-slate-200 p-4 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.15)] hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)] transition-all"
+                    className="group relative rounded-2xl backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50"
                   >
-                    {/* badge */}
-                    <span
-                      className={`
-                        absolute top-3 left-3 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide text-white
-                        ${badges[idx % badges.length] === "SALE" ? "bg-[#FF4D4F]" : badges[idx % badges.length] === "NEW" ? "bg-[#00B578]" : badges[idx % badges.length] === "HOT" ? "bg-[#FF8A00]" : "bg-[#0056D2]"}
-                      `}
-                    >
-                      {badges[idx % badges.length]}
-                    </span>
 
                     <Link to={`/products/${p._id}`} className="block">
-                      <div className="aspect-4/5 rounded-xl bg-slate-50 overflow-hidden mb-3">
+                      <div className="aspect-4/5 rounded-xl bg-white/5 overflow-hidden mb-4 border border-white/10">
                         {p.image ? (
                           <img
                             src={p.image}
                             alt={p.title}
-                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
                             loading="lazy"
                             decoding="async"
                           />
-                        ) : null}
+                        ) : (
+                          <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-cyan-500/20 to-blue-500/20">
+                            <span className="text-white/50 text-4xl">📱</span>
+                          </div>
+                        )}
                       </div>
-                      <h3 className="text-[15px] font-semibold text-[#1A1A1A] line-clamp-1">{p.title}</h3>
-                      <p className="mt-1 text-[13px] text-slate-500 line-clamp-2 min-h-[34px]">
-                        {p.description || "Producto de alta calidad con garantía."}
+                      
+                      <h3 className="text-[15px] font-bold text-white line-clamp-1 mb-2">
+                        {p.title}
+                      </h3>
+                      <p className="text-[13px] text-gray-300 line-clamp-2 min-h-[40px] mb-3">
+                        {p.description || "Producto de alta calidad con garantía extendida."}
                       </p>
-                      <div className="mt-3 flex items-center justify-between">
-                        <span className="text-[17px] font-extrabold text-[#007BFF]">
-                          {typeof p.price === "number" ? `$${p.price.toLocaleString("es-CO")}` : "—"}
+                      
+                      <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                        <span className="text-lg font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+                          {typeof p.price === "number" ? `$${p.price.toLocaleString("es-CO")}` : "Consultar"}
                         </span>
-                        <span className="text-xs text-slate-500">Ver más →</span>
+                        <span className="text-xs font-bold text-cyan-400 group-hover:translate-x-1 transition-transform">
+                          Ver →
+                        </span>
                       </div>
                     </Link>
                   </article>
@@ -194,19 +216,23 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ---------- BENEFICIOS (línea limpia, 4 columnas) ---------- */}
-        <section className="py-16 bg-[#F8F9FA]">
+        {/* ---------- BENEFICIOS ---------- */}
+        <section className="py-20">
           <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { t: "Garantía 12 meses", d: "Cobertura real en Colombia" },
-                { t: "Pago seguro", d: "Mercado Pago, PSE, tarjetas" },
-                { t: "Entrega rápida", d: "Envíos a todo el país" },
-                { t: "Soporte humano", d: "WhatsApp cuando lo necesites" },
+                { icon: "🛡️", t: "Garantía 12 meses", d: "Cobertura real en Colombia" },
+                { icon: "💳", t: "Pago seguro", d: "Mercado Pago, PSE, tarjetas" },
+                { icon: "🚀", t: "Entrega rápida", d: "Envíos a todo el país" },
+                { icon: "💬", t: "Soporte humano", d: "WhatsApp cuando lo necesites" },
               ].map((b, i) => (
-                <div key={i} className="rounded-2xl bg-white border border-slate-200 p-6 text-center shadow-sm">
-                  <p className="text-[15px] font-extrabold text-[#1A1A1A]">{b.t}</p>
-                  <p className="mt-1 text-sm text-slate-500">{b.d}</p>
+                <div 
+                  key={i} 
+                  className="rounded-2xl backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 border border-white/20 p-6 text-center shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50"
+                >
+                  <div className="text-4xl mb-3">{b.icon}</div>
+                  <p className="text-base font-black text-white mb-1">{b.t}</p>
+                  <p className="text-sm text-gray-300">{b.d}</p>
                 </div>
               ))}
             </div>

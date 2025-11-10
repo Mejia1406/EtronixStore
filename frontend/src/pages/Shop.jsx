@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { CATEGORIES } from "../constants/categories";
 import { NoResults, ProductSkeleton } from "../components/EmptyState";
 import { Helmet } from "react-helmet-async";
+import LightRays from "../components/LightRays";
 
 export default function Shop() {
   const location = useLocation();
@@ -29,31 +30,26 @@ export default function Shop() {
       }
     })();
 
-    // Leer categoría desde query param
     const params = new URLSearchParams(location.search);
     const cat = params.get('cat');
     if (cat) setSelectedCategory(cat);
   }, [location.search]);
 
-  // Debounce de búsqueda para evitar filtrar en cada tecla
   useEffect(() => {
     const id = setTimeout(() => setDebouncedQuery(searchQuery), 300);
     return () => clearTimeout(id);
   }, [searchQuery]);
 
-  // Filtrar productos por categoría y búsqueda
   useEffect(() => {
     let filtered = products;
 
-    // Filtrar por categoría
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(p => p.category === selectedCategory);
     }
 
-    // Filtrar por búsqueda
     if (debouncedQuery.trim()) {
       const query = debouncedQuery.toLowerCase();
-      filtered = filtered.filter(p => 
+      filtered = filtered.filter(p =>
         p.title.toLowerCase().includes(query) ||
         p.description?.toLowerCase().includes(query) ||
         p.specs?.brand?.toLowerCase().includes(query) ||
@@ -67,13 +63,13 @@ export default function Shop() {
   const addToCart = (p) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const found = cart.find((x) => x._id === p._id);
-    
+
     if (found) {
       found.quantity += 1;
     } else {
       cart.push({ ...p, quantity: 1 });
     }
-    
+
     localStorage.setItem('cart', JSON.stringify(cart));
     window.dispatchEvent(new Event('cartUpdated'));
     setToast('Producto agregado al carrito');
@@ -99,7 +95,6 @@ export default function Shop() {
         />
         <link rel="canonical" href={`https://etronix-store.com/shop${selectedCategory !== 'all' ? `?cat=${selectedCategory}` : ''}`} />
 
-        {/* Schema.org CollectionPage */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -142,7 +137,23 @@ export default function Shop() {
         </script>
       </Helmet>
 
-      <div className="min-h-screen flex flex-col bg-gray-50">
+      {/* === Fondo LightRays: ocupa toda la pantalla === */}
+      <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#00d4ff"
+          raysSpeed={1.5}
+          lightSpread={0.9}
+          rayLength={1.2}
+          followMouse
+          mouseInfluence={0.12}
+          noiseAmount={0.06}
+          distortion={0.03}
+          className="w-full h-full pointer-events-none opacity-70"
+        />
+      </div>
+
+      <div className="relative min-h-screen flex flex-col z-10">
         <main className="flex-1">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
@@ -150,48 +161,53 @@ export default function Shop() {
             <div className="mb-10">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
                 <div>
-                  <h1 className="text-4xl font-bold text-secondary-900 mb-3 font-display">
+                  <h1 className="text-4xl font-black text-white mb-3">
                     Catálogo de Productos
                   </h1>
-                  <p className="text-secondary-600 text-lg">
+                  <p className="text-gray-300 text-lg">
                     {selectedCategory === 'all'
                       ? 'Explora nuestra selección completa de accesorios tecnológicos'
                       : `Categoría: ${CATEGORIES.find(c => c.id === selectedCategory)?.name}`}
                   </p>
                 </div>
 
-                {/* Barra de Búsqueda Profesional */}
+                {/* Barra de Búsqueda */}
                 <div className="relative w-full md:w-96">
-                  <input
-                    type="text"
-                    placeholder="Buscar productos..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 rounded-lg border-2 border-secondary-200 focus:border-primary-600 focus:ring-2 focus:ring-primary-200 transition-all outline-none bg-white shadow-sm font-medium"
-                  />
-                  <svg
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-secondary-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-secondary-400 hover:text-secondary-700 font-bold"
-                    >
-                      ✕
-                    </button>
-                  )}
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="Buscar productos..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/10 backdrop-blur-md border-2 border-white/20 focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition-all outline-none text-white placeholder-gray-400 font-medium"
+                      />
+                      <svg
+                        className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white font-bold transition-colors"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Botón para mostrar/ocultar sidebar en móvil */}
+              {/* Botón categorías móvil */}
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden mb-6 flex items-center gap-2 px-5 py-3 bg-white rounded-lg border-2 border-secondary-200 shadow-sm hover:border-primary-600 transition-all font-semibold text-secondary-700"
+                className="md:hidden mb-6 flex items-center gap-2 px-5 py-3 backdrop-blur-md bg-white/10 rounded-xl border-2 border-white/20 hover:border-cyan-400/50 transition-all font-bold text-white"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -202,11 +218,11 @@ export default function Shop() {
 
             <div className="flex gap-8">
 
-              {/* Sidebar de Categorías Móvil */}
-              <aside className={`${sidebarOpen ? 'block' : 'hidden'} md:hidden w-full shrink-0`}>
-                <div className="bg-white rounded-2xl shadow-soft border-2 border-secondary-200 p-6 sticky top-4">
-                  <h2 className="font-bold text-xl text-secondary-900 mb-6 flex items-center gap-2 font-display">
-                    <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {/* Sidebar de Categorías */}
+              <aside className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-full md:w-72 shrink-0`}>
+                <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 sticky top-24 shadow-xl">
+                  <h2 className="font-black text-xl text-white mb-6 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
                     </svg>
                     Categorías
@@ -226,24 +242,24 @@ export default function Shop() {
                             setSidebarOpen(false);
                           }}
                           className={`
-                          w-full text-left px-4 py-3.5 rounded-lg transition-all flex items-center justify-between group font-medium
-                          ${selectedCategory === cat.id
-                              ? 'bg-primary-600 text-white shadow-sm'
-                              : 'hover:bg-primary-50 text-secondary-700 hover:text-primary-700'
+                            w-full text-left px-4 py-3.5 rounded-xl transition-all flex items-center justify-between group font-bold
+                            ${selectedCategory === cat.id
+                              ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
+                              : 'hover:bg-white/10 text-gray-300 hover:text-white border border-transparent hover:border-white/20'
                             }
-                        `}
+                          `}
                         >
                           <span className="flex items-center gap-3">
                             <span className="text-xl">{cat.icon}</span>
-                            <span className="font-semibold">{cat.name}</span>
+                            <span>{cat.name}</span>
                           </span>
                           <span className={`
-                          text-xs px-2.5 py-1 rounded-full font-bold
-                          ${selectedCategory === cat.id
+                            text-xs px-2.5 py-1 rounded-full font-black
+                            ${selectedCategory === cat.id
                               ? 'bg-white/20 text-white'
-                              : 'bg-secondary-100 text-secondary-600 group-hover:bg-primary-100 group-hover:text-primary-700'
+                              : 'bg-white/10 text-gray-300 group-hover:bg-cyan-400/20 group-hover:text-cyan-300'
                             }
-                        `}>
+                          `}>
                             {count}
                           </span>
                         </button>
@@ -273,8 +289,8 @@ export default function Shop() {
                   <>
                     {/* Contador de resultados */}
                     <div className="mb-6 flex items-center justify-between">
-                      <p className="text-sm text-secondary-600 font-medium">
-                        Mostrando <span className="font-bold text-primary-600">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'producto' : 'productos'}
+                      <p className="text-sm text-gray-300 font-medium">
+                        Mostrando <span className="font-black text-cyan-400">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'producto' : 'productos'}
                       </p>
                     </div>
 
@@ -282,12 +298,12 @@ export default function Shop() {
                       {filteredProducts.map((p) => (
                         <div
                           key={p._id}
-                          className="bg-white rounded-2xl shadow-soft hover:shadow-corporate transition-all duration-300 overflow-hidden group border-2 border-secondary-200 hover:border-primary-600 flex flex-col"
+                          className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 overflow-hidden group flex flex-col hover:-translate-y-1"
                         >
-                          <div className="relative aspect-square bg-secondary-50 overflow-hidden">
+                          <div className="relative aspect-square bg-white/5 overflow-hidden">
                             {/* Badge de stock */}
                             {p.stock > 0 && p.stock < 5 && (
-                              <span className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-bold shadow-sm">
+                              <span className="absolute top-4 right-4 z-10 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-black shadow-lg">
                                 Últimas unidades
                               </span>
                             )}
@@ -295,13 +311,11 @@ export default function Shop() {
                               <img
                                 src={p.image}
                                 alt={p.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                               />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center text-secondary-300">
-                                <svg className="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
+                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-500/20 to-blue-500/20">
+                                <span className="text-white/50 text-4xl">📱</span>
                               </div>
                             )}
                           </div>
@@ -309,23 +323,23 @@ export default function Shop() {
                           <div className="p-6 flex flex-col flex-1">
                             <div className="flex-1">
                               {p.category && (
-                                <span className="inline-block px-3 py-1 rounded-md bg-primary-100 text-primary-700 text-xs font-bold mb-3">
+                                <span className="inline-block px-3 py-1 rounded-lg bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-black mb-3">
                                   {CATEGORIES.find(c => c.id === p.category)?.icon} {CATEGORIES.find(c => c.id === p.category)?.name || p.category}
                                 </span>
                               )}
-                              <h3 className="font-bold text-xl mb-2 text-secondary-900 line-clamp-2 font-display">
+                              <h3 className="font-black text-xl mb-2 text-white line-clamp-2">
                                 {p.title}
                               </h3>
                               {p.description && (
-                                <p className="text-sm text-secondary-600 mb-4 line-clamp-2">
+                                <p className="text-sm text-gray-300 mb-4 line-clamp-2">
                                   {p.description}
                                 </p>
                               )}
-                              <div className="flex items-baseline justify-between mb-5">
-                                <p className="text-2xl font-bold text-primary-600 font-display">
+                              <div className="flex items-baseline justify-between mb-5 pb-4 border-b border-white/10">
+                                <p className="text-2xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                                   ${p.price.toLocaleString("es-CO")}
                                 </p>
-                                <p className={`text-sm font-semibold ${p.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                <p className={`text-sm font-black ${p.stock > 0 ? 'text-green-400' : 'text-red-400'}`}>
                                   {p.stock > 0 ? `Stock: ${p.stock}` : 'Agotado'}
                                 </p>
                               </div>
@@ -335,16 +349,16 @@ export default function Shop() {
                               <button
                                 onClick={() => addToCart(p)}
                                 disabled={p.stock === 0}
-                                className="w-full rounded-lg bg-primary-600 text-white py-3.5 font-bold hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
+                                className="w-full rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white py-3.5 font-black hover:from-cyan-400 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg hover:shadow-cyan-500/50 transform hover:-translate-y-0.5"
                               >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                                 {p.stock === 0 ? 'Sin Stock' : 'Agregar al Carrito'}
                               </button>
                               <Link
                                 to={`/products/${p._id}`}
-                                className="block w-full text-center rounded-lg border-2 border-primary-600 text-primary-600 py-3 font-bold hover:bg-primary-50 transition-all"
+                                className="block w-full text-center rounded-xl border-2 border-white/30 text-white py-3 font-black hover:bg-white/10 hover:border-cyan-400/50 transition-all"
                               >
                                 Ver Detalles
                               </Link>
@@ -360,13 +374,13 @@ export default function Shop() {
           </div>
         </main>
 
-        {/* Toast Corporativo */}
+        {/* Toast */}
         {toast && (
-          <div className="fixed bottom-8 right-8 z-50 bg-secondary-900 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 border border-primary-600">
-            <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>I
-            <span className="font-semibold">{toast}</span>
+          <div className="fixed bottom-8 right-8 z-50 backdrop-blur-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 flex items-center gap-3 border border-green-400/50">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+            </svg>
+            <span className="font-black">{toast}</span>
           </div>
         )}
       </div>

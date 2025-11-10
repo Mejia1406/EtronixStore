@@ -53,7 +53,7 @@
     letter-spacing: -0.025em;
   }
 
-  /* Fondo corporativo sutil */
+  /* Fondo corporativo sutil (para TODO el sitio por defecto) */
   body::before {
     content: '';
     position: fixed;
@@ -72,6 +72,23 @@
     outline-offset: 2px;
     border-radius: 4px;
   }
+
+  /* Para que LightRays cubra todo el viewport */
+  html, body, #root {
+    height: 100%;
+  }
+
+  /* Desactivar el fondo global SOLO dentro del panel de administración */
+  body.admin-no-global-bg::before {
+    display: none !important;
+  }
+
+  /* Asegurar que el contenido del admin esté sobre LightRays */
+body.admin-no-global-bg {
+  position: relative;
+  min-height: 100vh;
+}
+
 }
 
 @layer utilities {

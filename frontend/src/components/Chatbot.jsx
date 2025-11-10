@@ -10,6 +10,7 @@ export default function Chatbot() {
     }
   ]);
   const [inputText, setInputText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -75,7 +76,6 @@ export default function Chatbot() {
   const getBotResponse = (userMessage) => {
     const lowerMessage = userMessage.toLowerCase();
     
-    // Buscar en la base de conocimientos
     for (const [category, data] of Object.entries(knowledgeBase)) {
       const found = data.keywords.some(keyword => lowerMessage.includes(keyword));
       if (found) {
@@ -83,7 +83,6 @@ export default function Chatbot() {
       }
     }
 
-    // Si no encuentra una coincidencia específica
     return "🤔 Disculpa, no estoy seguro de entender tu pregunta.\n\nPuedo ayudarte con:\n\n• Información de productos\n• Métodos de pago\n• Envíos y entregas\n• Garantías\n• Seguimiento de pedidos\n\nTambién puedes contactar a un asesor por WhatsApp: +57 320 7208410";
   };
 
@@ -98,7 +97,6 @@ export default function Chatbot() {
   const handleSendMessage = (text = inputText) => {
     if (!text.trim()) return;
 
-    // Agregar mensaje del usuario
     const userMessage = {
       type: "user",
       text: text.trim(),
@@ -107,15 +105,17 @@ export default function Chatbot() {
     setMessages(prev => [...prev, userMessage]);
     setInputText("");
 
-    // Simular "escribiendo..." y luego responder
+    // Simular "escribiendo..."
+    setIsTyping(true);
     setTimeout(() => {
+      setIsTyping(false);
       const botResponse = {
         type: "bot",
         text: getBotResponse(text),
         timestamp: new Date()
       };
       setMessages(prev => [...prev, botResponse]);
-    }, 500);
+    }, 800);
   };
 
   const handleKeyPress = (e) => {
@@ -131,88 +131,102 @@ export default function Chatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 w-16 h-16 bg-linear-to-br from-indigo-600 to-purple-600 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-all duration-300 z-50 group"
+          className="fixed bottom-6 right-6 w-16 h-16 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-full shadow-2xl shadow-cyan-500/50 flex items-center justify-center hover:scale-110 transition-all duration-300 z-50 group"
           aria-label="Abrir chat"
         >
-          {/* Robot Icon */}
           <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C11.45 2 11 2.45 11 3V4.07C8.69 4.38 6.92 6.15 6.61 8.46L5 8.46C4.45 8.46 4 8.91 4 9.46V12.54C4 13.09 4.45 13.54 5 13.54H6.61C6.92 15.85 8.69 17.62 11 17.93V20H9C8.45 20 8 20.45 8 21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21C16 20.45 15.55 20 15 20H13V17.93C15.31 17.62 17.08 15.85 17.39 13.54H19C19.55 13.54 20 13.09 20 12.54V9.46C20 8.91 19.55 8.46 19 8.46H17.39C17.08 6.15 15.31 4.38 13 4.07V3C13 2.45 12.55 2 12 2M12 6C14.21 6 16 7.79 16 10V13C16 15.21 14.21 17 12 17C9.79 17 8 15.21 8 13V10C8 7.79 9.79 6 12 6M10 10C9.45 10 9 10.45 9 11C9 11.55 9.45 12 10 12C10.55 12 11 11.55 11 11C11 10.45 10.55 10 10 10M14 10C13.45 10 13 10.45 13 11C13 11.55 13.45 12 14 12C14.55 12 15 11.55 15 11C15 10.45 14.55 10 14 10Z"/>
           </svg>
-          {/* Pulso animado */}
-          <span className="absolute inset-0 rounded-full bg-indigo-600 animate-ping opacity-20"></span>
+          <span className="absolute inset-0 rounded-full bg-cyan-400 animate-ping opacity-30"></span>
         </button>
       )}
 
-
       {/* Ventana del chat */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-2xl shadow-2xl flex flex-col z-50 border border-gray-200 overflow-hidden">
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] backdrop-blur-2xl bg-gray-900/95 rounded-2xl shadow-2xl border border-white/10 flex flex-col z-50 overflow-hidden">
           {/* Header */}
-          <div className="bg-linear-to-r from-indigo-600 to-purple-600 px-6 py-4 flex items-center justify-between">
+          <div className="relative bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-4 flex items-center justify-between">
+            <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/50 to-transparent" />
+            
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center p-1.5">
-                {/* Robot Icon */}
-                <svg className="w-full h-full text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C11.45 2 11 2.45 11 3V4.07C8.69 4.38 6.92 6.15 6.61 8.46L5 8.46C4.45 8.46 4 8.91 4 9.46V12.54C4 13.09 4.45 13.54 5 13.54H6.61C6.92 15.85 8.69 17.62 11 17.93V20H9C8.45 20 8 20.45 8 21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21C16 20.45 15.55 20 15 20H13V17.93C15.31 17.62 17.08 15.85 17.39 13.54H19C19.55 13.54 20 13.09 20 12.54V9.46C20 8.91 19.55 8.46 19 8.46H17.39C17.08 6.15 15.31 4.38 13 4.07V3C13 2.45 12.55 2 12 2M12 6C14.21 6 16 7.79 16 10V13C16 15.21 14.21 17 12 17C9.79 17 8 15.21 8 13V10C8 7.79 9.79 6 12 6M10 10C9.45 10 9 10.45 9 11C9 11.55 9.45 12 10 12C10.55 12 11 11.55 11 11C11 10.45 10.55 10 10 10M14 10C13.45 10 13 10.45 13 11C13 11.55 13.45 12 14 12C14.55 12 15 11.55 15 11C15 10.45 14.55 10 14 10Z"/>
-                </svg>
+              <div className="relative">
+                <div className="absolute inset-0 bg-white/30 rounded-full blur-md" />
+                <div className="relative w-11 h-11 bg-white rounded-full flex items-center justify-center p-2">
+                  <svg className="w-full h-full text-cyan-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C11.45 2 11 2.45 11 3V4.07C8.69 4.38 6.92 6.15 6.61 8.46L5 8.46C4.45 8.46 4 8.91 4 9.46V12.54C4 13.09 4.45 13.54 5 13.54H6.61C6.92 15.85 8.69 17.62 11 17.93V20H9C8.45 20 8 20.45 8 21C8 21.55 8.45 22 9 22H15C15.55 22 16 21.55 16 21C16 20.45 15.55 20 15 20H13V17.93C15.31 17.62 17.08 15.85 17.39 13.54H19C19.55 13.54 20 13.09 20 12.54V9.46C20 8.91 19.55 8.46 19 8.46H17.39C17.08 6.15 15.31 4.38 13 4.07V3C13 2.45 12.55 2 12 2M12 6C14.21 6 16 7.79 16 10V13C16 15.21 14.21 17 12 17C9.79 17 8 15.21 8 13V10C8 7.79 9.79 6 12 6M10 10C9.45 10 9 10.45 9 11C9 11.55 9.45 12 10 12C10.55 12 11 11.55 11 11C11 10.45 10.55 10 10 10M14 10C13.45 10 13 10.45 13 11C13 11.55 13.45 12 14 12C14.55 12 15 11.55 15 11C15 10.45 14.55 10 14 10Z"/>
+                  </svg>
+                </div>
               </div>
               <div>
-                <h3 className="font-bold text-white">Asistente Etronix</h3>
+                <h3 className="font-black text-white">Asistente Etronix</h3>
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                  <p className="text-xs text-white/90">En línea</p>
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                  <p className="text-xs text-white/90 font-bold">En línea</p>
                 </div>
               </div>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-white/90 hover:text-white hover:bg-white/10 rounded-lg p-2 transition-colors"
+              className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-2 transition-all"
               aria-label="Cerrar chat"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
           {/* Mensajes */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-background-light">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                     msg.type === "user"
-                      ? "bg-linear-to-r from-indigo-600 to-purple-600 text-white"
-                      : "bg-white border border-gray-200 text-gray-800 shadow-sm"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                      : "backdrop-blur-md bg-white/10 border border-white/20 text-white shadow-lg"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-line">{msg.text}</p>
-                  <p className={`text-xs mt-1 ${
-                    msg.type === "user" ? "text-white/70" : "text-gray-500"
+                  <p className="text-sm whitespace-pre-line leading-relaxed">{msg.text}</p>
+                  <p className={`text-xs mt-2 ${
+                    msg.type === "user" ? "text-white/80" : "text-gray-400"
                   }`}>
                     {msg.timestamp.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
                   </p>
                 </div>
               </div>
             ))}
+
+            {/* Indicador de escribiendo */}
+            {isTyping && (
+              <div className="flex justify-start">
+                <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl px-5 py-3">
+                  <div className="flex gap-1.5">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Preguntas rápidas */}
           {messages.length === 1 && (
-            <div className="px-4 py-3 bg-white border-t border-gray-200">
-              <p className="text-xs text-gray-600 mb-2 font-medium">
-                Preguntas frecuentes:
+            <div className="px-4 py-3 border-t border-white/10">
+              <p className="text-xs text-gray-400 mb-2 font-bold">
+                💬 Preguntas frecuentes:
               </p>
               <div className="flex flex-wrap gap-2">
                 {quickQuestions.map((question, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSendMessage(question)}
-                    className="text-xs px-3 py-1.5 rounded-full bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all font-medium"
+                    className="text-xs px-3 py-1.5 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-gray-300 hover:bg-gradient-to-r hover:from-cyan-500 hover:to-blue-500 hover:text-white hover:border-transparent transition-all font-bold"
                   >
                     {question}
                   </button>
@@ -222,7 +236,7 @@ export default function Chatbot() {
           )}
 
           {/* Input */}
-          <div className="p-4 bg-white border-t border-gray-200">
+          <div className="p-4 border-t border-white/10">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -230,22 +244,40 @@ export default function Chatbot() {
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Escribe tu pregunta..."
-                className="flex-1 px-4 py-3 rounded-full border border-border-light bg-background-light text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                className="flex-1 px-4 py-3 rounded-full backdrop-blur-md bg-white/10 border border-white/20 text-white placeholder-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 transition-all"
               />
               <button
                 onClick={() => handleSendMessage()}
                 disabled={!inputText.trim()}
-                className="w-12 h-12 bg-linear-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-12 h-12 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center hover:shadow-lg hover:shadow-cyan-500/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                 aria-label="Enviar mensaje"
               >
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                 </svg>
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Estilos para scrollbar */}
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(0, 212, 255, 0.3);
+          border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 212, 255, 0.5);
+        }
+      `}</style>
     </>
   );
 }

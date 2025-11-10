@@ -2,26 +2,23 @@ import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import AdminLogin from "../components/AdminLogin";
 import { Helmet } from "react-helmet-async";
+import LightRays from "../components/LightRays";
 
 export default function Admin() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // all, pending, paid, failed
+  const [filter, setFilter] = useState("all");
   const [lastOrderCount, setLastOrderCount] = useState(0);
   const audioRef = useRef(null);
-  
-  // Estado de autenticación
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCode, setAdminCode] = useState('');
   const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Verificar autenticación al cargar
   useEffect(() => {
     const savedCode = localStorage.getItem('adminCode');
     const loginTime = localStorage.getItem('adminLoginTime');
     
     if (savedCode && loginTime) {
-      // Verificar que la sesión no haya expirado (24 horas)
       const now = Date.now();
       const elapsed = now - parseInt(loginTime);
       const twentyFourHours = 24 * 60 * 60 * 1000;
@@ -30,21 +27,27 @@ export default function Admin() {
         setAdminCode(savedCode);
         setIsAuthenticated(true);
       } else {
-        // Sesión expirada
         handleLogout();
       }
     }
     setCheckingAuth(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleLoginSuccess = (code) => {
     setAdminCode(code);
     setIsAuthenticated(true);
+    try {
+      localStorage.setItem('adminCode', code);
+      localStorage.setItem('adminLoginTime', String(Date.now()));
+    } catch (e) {}
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminCode');
-    localStorage.removeItem('adminLoginTime');
+    try {
+      localStorage.removeItem('adminCode');
+      localStorage.removeItem('adminLoginTime');
+    } catch (e) {}
     setIsAuthenticated(false);
     setAdminCode('');
     setOrders([]);
@@ -52,40 +55,29 @@ export default function Admin() {
 
   const fetchOrders = async () => {
     if (!adminCode) return;
-    
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
-        headers: {
-          'x-admin-code': adminCode
-        }
+        headers: { 'x-admin-code': adminCode }
       });
-      
       if (res.status === 401 || res.status === 403) {
-        // Código inválido - hacer logout
         handleLogout();
         return;
       }
-      
       const data = await res.json();
-      
-      // Manejar nueva estructura con paginación
       const ordersList = data.orders || data;
-      
-      // Detectar nuevos pedidos
+
       if (lastOrderCount > 0 && ordersList.length > lastOrderCount) {
-        // Hay nuevos pedidos, reproducir sonido
-        if (audioRef.current) {
-          audioRef.current.play().catch(e => console.log("Audio error:", e));
-        }
-        // Mostrar notificación del navegador
+        if (audioRef.current) audioRef.current.play().catch(() => {});
         if (Notification.permission === "granted") {
-          new Notification("¡Nuevo pedido!", {
-            body: `Tienes ${ordersList.length - lastOrderCount} pedido(s) nuevo(s)`,
-            icon: "/favicon.ico"
-          });
+          try {
+            new Notification("¡Nuevo pedido!", {
+              body: `Tienes ${ordersList.length - lastOrderCount} pedido(s) nuevo(s)`,
+              icon: "/favicon.ico"
+            });
+          } catch (e) {}
         }
       }
-      
+
       setOrders(ordersList);
       setLastOrderCount(ordersList.length);
     } catch (err) {
@@ -97,27 +89,20 @@ export default function Admin() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    
-    // Solicitar permiso para notificaciones
-    if (Notification.permission === "default") {
-      Notification.requestPermission();
-    }
-
+    if (Notification.permission === "default") Notification.requestPermission();
     fetchOrders();
-
-    // Actualizar cada 30 segundos
     const interval = setInterval(fetchOrders, 30000);
-
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated, adminCode]);
 
   const statusColors = {
-    pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-    paid: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
-    failed: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
-    processing: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-    shipped: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-    delivered: "bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400",
+    pending: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",
+    paid: "bg-green-500/20 text-green-300 border-green-500/30",
+    failed: "bg-red-500/20 text-red-300 border-red-500/30",
+    processing: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    shipped: "bg-purple-500/20 text-purple-300 border-purple-500/30",
+    delivered: "bg-teal-500/20 text-teal-300 border-teal-500/30",
   };
 
   const statusLabels = {
@@ -131,24 +116,17 @@ export default function Admin() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     if (!adminCode) return;
-    
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/orders/${orderId}`, {
         method: "PATCH",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "x-admin-code": adminCode
         },
         body: JSON.stringify({ status: newStatus }),
       });
-
       if (res.ok) {
-        // Actualizar localmente
-        setOrders(prev =>
-          prev.map(order =>
-            order._id === orderId ? { ...order, status: newStatus } : order
-          )
-        );
+        setOrders(prev => prev.map(o => o._id === orderId ? { ...o, status: newStatus } : o));
       } else if (res.status === 401 || res.status === 403) {
         alert("Sesión expirada. Por favor inicia sesión nuevamente.");
         handleLogout();
@@ -175,16 +153,30 @@ export default function Admin() {
     delivered: orders.filter(o => o.status === "delivered").length,
   };
 
-  // Mostrar pantalla de carga mientras verifica autenticación
   if (checkingAuth) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
+      <>
+        <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#00d4ff"
+            raysSpeed={1.5}
+            lightSpread={0.9}
+            rayLength={1.2}
+            followMouse
+            mouseInfluence={0.12}
+            noiseAmount={0.06}
+            distortion={0.03}
+            className="w-full h-full pointer-events-none opacity-70"
+          />
+        </div>
+        <div className="relative min-h-screen flex items-center justify-center z-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
+        </div>
+      </>
     );
   }
 
-  // Mostrar login si no está autenticado
   if (!isAuthenticated) {
     return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
   }
@@ -196,80 +188,111 @@ export default function Admin() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <div className="min-h-screen bg-background-light dark:bg-background-dark">
-        {/* Audio para notificación */}
-        <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKM0/LRgzgKGGS46+mjUhENUKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0" />
+      {/* Fondo LightRays */}
+      <div className="fixed inset-0 w-full h-full z-0 bg-gradient-to-br from-gray-900 via-slate-900 to-black">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#00d4ff"
+          raysSpeed={1.5}
+          lightSpread={0.9}
+          rayLength={1.2}
+          followMouse
+          mouseInfluence={0.12}
+          noiseAmount={0.06}
+          distortion={0.03}
+          className="w-full h-full pointer-events-none opacity-70"
+        />
+      </div>
 
-        {/* Encabezado interno de la página (no global) */}
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-text-light dark:text-text-dark">Panel de Administración</h1>
-              <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Última actualización: {new Date().toLocaleTimeString("es-CO")}</p>
+      <div className="relative min-h-screen z-10">
+        <audio ref={audioRef} src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBjKM0/LRgzgKGGS46+mjUhENUKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0yH8yBSh+zPLaizsIHWu96+mjUBELTKXh8LJeHwU7k9n0" />
+
+        {/* Header */}
+        <header className="sticky top-0 z-20 backdrop-blur-xl bg-gray-900/80 border-b border-white/10 shadow-lg">
+          <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50" />
+          
+          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-lg blur-md" />
+                <span className="relative material-symbols-outlined text-3xl text-cyan-400">dashboard</span>
+              </div>
+              <h1 className="text-2xl font-black bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
+                Panel de Administración
+              </h1>
             </div>
-            <div className="flex items-center gap-4">
-              <button onClick={fetchOrders} className="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-opacity-90 transition-colors">🔄 Actualizar</button>
+            
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={fetchOrders} 
+                className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-black shadow-lg hover:shadow-cyan-500/50 transition-all hover:-translate-y-0.5 flex items-center gap-2"
+              >
+                <span className="material-symbols-outlined text-lg">refresh</span>
+                Actualizar
+              </button>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 rounded-lg border border-red-500 text-red-500 font-semibold hover:bg-red-500 hover:text-white transition-colors flex items-center gap-2"
+                className="px-4 py-2 rounded-xl border-2 border-red-500/50 text-red-400 font-black hover:bg-red-500 hover:text-white transition-all flex items-center gap-2"
               >
                 <span className="material-symbols-outlined text-lg">logout</span>
-                Cerrar Sesión
+                Cerrar
               </button>
-              <Link to="/shop" className="text-sm text-primary hover:underline">← Volver a la tienda</Link>
+              <Link 
+                to="/shop" 
+                className="px-4 py-2 rounded-xl border-2 border-white/30 text-white font-black hover:bg-white/10 hover:border-cyan-400/50 transition-all flex items-center gap-1"
+              >
+                <span className="material-symbols-outlined text-base">arrow_back</span>
+                Tienda
+              </Link>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Main */}
         <main className="max-w-7xl mx-auto px-4 pb-12">
           {/* Estadísticas */}
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
-            <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-4">
-              <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">Total</p>
-              <p className="text-2xl font-bold text-text-light dark:text-text-dark">{orderStats.total}</p>
-            </div>
-            <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-4">
-              <p className="text-sm text-yellow-600 dark:text-yellow-400">Pendientes</p>
-              <p className="text-2xl font-bold text-text-light dark:text-text-dark">{orderStats.pending}</p>
-            </div>
-            <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-4">
-              <p className="text-sm text-green-600 dark:text-green-400">Pagados</p>
-              <p className="text-2xl font-bold text-text-light dark:text-text-dark">{orderStats.paid}</p>
-            </div>
-            <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-4">
-              <p className="text-sm text-blue-600 dark:text-blue-400">Procesando</p>
-              <p className="text-2xl font-bold text-text-light dark:text-text-dark">{orderStats.processing}</p>
-            </div>
-            <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-4">
-              <p className="text-sm text-purple-600 dark:text-purple-400">Enviados</p>
-              <p className="text-2xl font-bold text-text-light dark:text-text-dark">{orderStats.shipped}</p>
-            </div>
-            <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-4">
-              <p className="text-sm text-teal-600 dark:text-teal-400">Entregados</p>
-              <p className="text-2xl font-bold text-text-light dark:text-text-dark">{orderStats.delivered}</p>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8 mt-8">
+            {[
+              { label: "Total", value: orderStats.total, color: "from-gray-600 to-gray-700", icon: "summarize" },
+              { label: "Pendientes", value: orderStats.pending, color: "from-yellow-600 to-yellow-700", icon: "pending" },
+              { label: "Pagados", value: orderStats.paid, color: "from-green-600 to-green-700", icon: "paid" },
+              { label: "Procesando", value: orderStats.processing, color: "from-blue-600 to-blue-700", icon: "sync" },
+              { label: "Enviados", value: orderStats.shipped, color: "from-purple-600 to-purple-700", icon: "local_shipping" },
+              { label: "Entregados", value: orderStats.delivered, color: "from-teal-600 to-teal-700", icon: "check_circle" },
+            ].map((stat) => (
+              <div 
+                key={stat.label} 
+                className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-4 flex flex-col items-center justify-center shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all"
+              >
+                <span className={`material-symbols-outlined text-3xl mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  {stat.icon}
+                </span>
+                <p className="text-sm font-bold text-gray-300">{stat.label}</p>
+                <p className="text-3xl font-black text-white">{stat.value}</p>
+              </div>
+            ))}
           </div>
 
           {/* Filtros */}
-          <div className="mb-6 flex flex-wrap gap-2">
+          <div className="mb-8 flex flex-wrap gap-2 justify-center">
             {[
-              { value: "all", label: "Todos" },
-              { value: "pending", label: "Pendientes" },
-              { value: "paid", label: "Pagados" },
-              { value: "processing", label: "Procesando" },
-              { value: "shipped", label: "Enviados" },
-              { value: "delivered", label: "Entregados" },
-              { value: "failed", label: "Fallidos" },
+              { value: "all", label: "Todos", icon: "list" },
+              { value: "pending", label: "Pendientes", icon: "pending" },
+              { value: "paid", label: "Pagados", icon: "paid" },
+              { value: "processing", label: "Procesando", icon: "sync" },
+              { value: "shipped", label: "Enviados", icon: "local_shipping" },
+              { value: "delivered", label: "Entregados", icon: "check_circle" },
+              { value: "failed", label: "Fallidos", icon: "cancel" },
             ].map((filterOption) => (
               <button
                 key={filterOption.value}
                 onClick={() => setFilter(filterOption.value)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${filter === filterOption.value
-                    ? "bg-primary text-black"
-                    : "bg-card-light dark:bg-card-dark border border-border-light dark:border-border-dark text-text-light dark:text-text-dark hover:bg-border-light dark:hover:bg-border-dark"
-                  }`}
+                className={`px-5 py-2.5 rounded-xl font-black transition-all flex items-center gap-2 shadow-lg ${
+                  filter === filterOption.value
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-cyan-500/50"
+                    : "backdrop-blur-md bg-white/10 border-2 border-white/20 text-gray-300 hover:bg-white/20 hover:border-cyan-400/50"
+                }`}
               >
+                <span className="material-symbols-outlined text-lg">{filterOption.icon}</span>
                 {filterOption.label}
               </button>
             ))}
@@ -278,54 +301,48 @@ export default function Admin() {
           {/* Lista de pedidos */}
           {loading ? (
             <div className="flex justify-center items-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
             </div>
           ) : filteredOrders.length === 0 ? (
-            <div className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-8 text-center">
-              <p className="text-text-secondary-light dark:text-text-secondary-dark">
+            <div className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-8 text-center shadow-xl">
+              <p className="text-gray-300 text-lg font-bold">
                 {filter === "all" ? "No hay pedidos aún" : `No hay pedidos ${filter}`}
               </p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {filteredOrders.map((order) => (
                 <div
                   key={order._id}
-                  className="bg-card-light dark:bg-card-dark rounded-lg border border-border-light dark:border-border-dark p-6 hover:shadow-lg transition-shadow"
+                  className="backdrop-blur-xl bg-gradient-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 shadow-xl hover:shadow-2xl hover:border-cyan-400/50 transition-all"
                 >
                   {/* Encabezado del pedido */}
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between mb-6 gap-4">
-                    <div>
-                      <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mb-1">
-                        ID: {order._id}
-                      </p>
-                      <p className="text-sm text-text-secondary-light dark:text-text-secondary-dark">
-                        📅 {new Date(order.createdAt).toLocaleString("es-CO")}
-                      </p>
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4 pb-4 border-b border-white/10">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-2xl text-cyan-400">receipt_long</span>
+                      <div>
+                        <p className="text-xs text-gray-400 mb-1 font-bold">ID: {order._id}</p>
+                        <p className="text-sm text-gray-300">📅 {new Date(order.createdAt).toLocaleString("es-CO")}</p>
+                      </div>
                     </div>
 
-                    {/* Estado y cambio de estado */}
-                    <div className="flex flex-col gap-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold text-center ${statusColors[order.status]
-                          }`}
-                      >
+                    <div className="flex flex-col md:items-end gap-2">
+                      <span className={`px-4 py-1.5 rounded-xl text-xs font-black border ${statusColors[order.status]}`}>
                         {statusLabels[order.status]}
                       </span>
 
-                      {/* Selector de estado */}
                       {order.status !== "failed" && (
                         <select
                           value={order.status}
                           onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                          className="text-xs px-2 py-1 rounded border border-border-light dark:border-border-dark bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark"
+                          className="text-xs px-3 py-1.5 rounded-lg backdrop-blur-md bg-white/10 border border-white/20 text-gray-200 font-bold"
                         >
-                          <option value="pending">Pendiente</option>
-                          <option value="paid">Pagado</option>
-                          <option value="processing">Procesando</option>
-                          <option value="shipped">Enviado</option>
-                          <option value="delivered">Entregado</option>
-                          <option value="failed">Fallido</option>
+                          <option value="pending" className="bg-gray-900">Pendiente</option>
+                          <option value="paid" className="bg-gray-900">Pagado</option>
+                          <option value="processing" className="bg-gray-900">Procesando</option>
+                          <option value="shipped" className="bg-gray-900">Enviado</option>
+                          <option value="delivered" className="bg-gray-900">Entregado</option>
+                          <option value="failed" className="bg-gray-900">Fallido</option>
                         </select>
                       )}
                     </div>
@@ -333,89 +350,75 @@ export default function Admin() {
 
                   <div className="grid md:grid-cols-2 gap-6">
                     {/* Información del cliente */}
-                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4">
-                      <h3 className="text-sm font-bold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
-                        👤 Información del Cliente
+                    <div className="backdrop-blur-md bg-white/5 rounded-xl p-4 border border-white/10">
+                      <h3 className="text-sm font-black text-white mb-3 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-base text-cyan-400">person</span>
+                        Información del Cliente
                       </h3>
                       <div className="space-y-2 text-sm">
                         <div>
-                          <span className="font-semibold text-text-light dark:text-text-dark">Nombre:</span>
-                          <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                            {order.buyer?.name || "Sin nombre"}
-                          </p>
+                          <span className="font-bold text-gray-300">Nombre:</span>
+                          <p className="text-white">{order.buyer?.name || "Sin nombre"}</p>
                         </div>
 
                         <div>
-                          <span className="font-semibold text-text-light dark:text-text-dark">Teléfono:</span>
-                          <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                            {order.buyer?.phone || "Sin teléfono"}
-                          </p>
+                          <span className="font-bold text-gray-300">Teléfono:</span>
+                          <p className="text-white">{order.buyer?.phone || "Sin teléfono"}</p>
                           {order.buyer?.phone && (
                             <a
                               href={`https://wa.me/57${order.buyer.phone.replace(/\s/g, '')}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-green-600 hover:underline text-xs mt-1 inline-block"
+                              className="text-green-400 hover:text-green-300 font-bold text-xs mt-1 inline-flex items-center gap-1"
                             >
-                              📱 Contactar por WhatsApp
+                              <span className="material-symbols-outlined text-base">whatsapp</span> WhatsApp
                             </a>
                           )}
                         </div>
 
                         {order.buyer?.email && (
                           <div>
-                            <span className="font-semibold text-text-light dark:text-text-dark">Email:</span>
-                            <p className="text-text-secondary-light dark:text-text-secondary-dark break-all">
-                              {order.buyer.email}
-                            </p>
+                            <span className="font-bold text-gray-300">Email:</span>
+                            <p className="text-white break-all">{order.buyer.email}</p>
                           </div>
                         )}
 
                         <div>
-                          <span className="font-semibold text-text-light dark:text-text-dark">Dirección:</span>
-                          <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                            {order.buyer?.address || "Sin dirección"}
-                          </p>
+                          <span className="font-bold text-gray-300">Dirección:</span>
+                          <p className="text-white">{order.buyer?.address || "Sin dirección"}</p>
                         </div>
 
                         <div>
-                          <span className="font-semibold text-text-light dark:text-text-dark">Ciudad:</span>
-                          <p className="text-text-secondary-light dark:text-text-secondary-dark">
-                            {order.buyer?.city || "Sin ciudad"}
-                          </p>
+                          <span className="font-bold text-gray-300">Ciudad:</span>
+                          <p className="text-white">{order.buyer?.city || "Sin ciudad"}</p>
                         </div>
 
                         {order.buyer?.notes && (
                           <div>
-                            <span className="font-semibold text-text-light dark:text-text-dark">Notas:</span>
-                            <p className="text-text-secondary-light dark:text-text-secondary-dark italic">
-                              "{order.buyer.notes}"
-                            </p>
+                            <span className="font-bold text-gray-300">Notas:</span>
+                            <p className="text-gray-300 italic">"{order.buyer.notes}"</p>
                           </div>
                         )}
                       </div>
                     </div>
 
                     {/* Productos */}
-                    <div className="bg-background-light dark:bg-background-dark rounded-lg p-4">
-                      <h3 className="text-sm font-bold text-text-light dark:text-text-dark mb-3 flex items-center gap-2">
-                        📦 Productos
+                    <div className="backdrop-blur-md bg-white/5 rounded-xl p-4 border border-white/10">
+                      <h3 className="text-sm font-black text-white mb-3 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-base text-cyan-400">inventory_2</span>
+                        Productos
                       </h3>
                       <div className="space-y-2">
                         {order.items.map((item, idx) => (
                           <div
                             key={idx}
-                            className="flex justify-between items-start text-sm bg-card-light dark:bg-card-dark p-3 rounded border border-border-light dark:border-border-dark"
+                            className="flex justify-between items-start text-sm backdrop-blur-md bg-white/5 p-3 rounded-lg border border-white/10"
                           >
                             <div className="flex-1">
-                              <p className="font-semibold text-text-light dark:text-text-dark">
-                                {item.title}
-                              </p>
-                              <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark">
-                                ${item.unit_price?.toLocaleString("es-CO")} x {item.quantity}
-                              </p>
+                              <p className="font-black text-white">{item.title}</p>
+                              <p className="text-xs text-gray-400">${item.unit_price?.toLocaleString("es-CO")} x {item.quantity}</p>
                             </div>
-                            <span className="font-bold text-primary">
+                            <span className="font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                               ${(item.unit_price * item.quantity).toLocaleString("es-CO")}
                             </span>
                           </div>
@@ -423,16 +426,17 @@ export default function Admin() {
                       </div>
 
                       {/* Total */}
-                      <div className="mt-4 pt-4 border-t border-border-light dark:border-border-dark flex justify-between items-center">
-                        <span className="font-bold text-text-light dark:text-text-dark">TOTAL:</span>
-                        <span className="text-2xl font-bold text-primary">
+                      <div className="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
+                        <span className="font-black text-white">TOTAL:</span>
+                        <span className="text-2xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                           ${order.total?.toLocaleString("es-CO")}
                         </span>
                       </div>
 
                       {order.mp_payment_id && (
-                        <p className="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-2">
-                          💳 ID Pago MP: {order.mp_payment_id}
+                        <p className="text-xs text-gray-400 mt-2 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-base text-cyan-400">credit_card</span>
+                          ID Pago MP: {order.mp_payment_id}
                         </p>
                       )}
                     </div>
