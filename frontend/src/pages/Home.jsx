@@ -62,7 +62,7 @@ export default function Home() {
         {/* ---------- HERO (estilo referencia: texto izq, imagen der) ---------- */}
         <section className="relative">
           {/* fondo limpio con ligera sombra superior */}
-          <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-black/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-0 top-0 h-10 bg-linear-to-b from-black/5 to-transparent pointer-events-none" />
           <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14 lg:py-20">
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
               {/* Texto */}
@@ -102,7 +102,7 @@ export default function Home() {
               <div className="order-1 lg:order-2">
                 <div className="relative">
                   {/* “pedestal” minimal */}
-                  <div className="absolute -inset-x-6 -bottom-8 h-40 bg-white/80 rounded-[2rem] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] -z-10" />
+                  <div className="absolute -inset-x-6 -bottom-8 h-40 bg-white/80 rounded-4xl shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] -z-10" />
                   <img
                     src={hero}
                     alt="Hero Etronix"
@@ -141,7 +141,7 @@ export default function Home() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <div key={i} className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
-                    <div className="aspect-[4/5] bg-slate-100 rounded-xl mb-3" />
+                    <div className="aspect-4/5 bg-slate-100 rounded-xl mb-3" />
                     <div className="h-4 w-3/4 bg-slate-100 rounded mb-2" />
                     <div className="h-4 w-1/2 bg-slate-100 rounded" />
                   </div>
@@ -165,7 +165,7 @@ export default function Home() {
                     </span>
 
                     <Link to={`/products/${p._id}`} className="block">
-                      <div className="aspect-[4/5] rounded-xl bg-slate-50 overflow-hidden mb-3">
+                      <div className="aspect-4/5 rounded-xl bg-slate-50 overflow-hidden mb-3">
                         {p.image ? (
                           <img
                             src={p.image}

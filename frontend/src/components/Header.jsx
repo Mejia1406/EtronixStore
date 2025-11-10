@@ -42,13 +42,13 @@ export default function Header({ cartCount: cartCountProp, onToggleSidebar, onTo
       <header
         className="
           sticky top-0 z-50
-          supports-[backdrop-filter]:bg-white/70 bg-white
-          supports-[backdrop-filter]:backdrop-blur-xl
+          supports-backdrop-filter:bg-white/70 bg-white
+          supports-backdrop-filter:backdrop-blur-xl
           border-b border-white/50 shadow-sm
         "
       >
         {/* línea inferior con gradiente (detalle premium) */}
-        <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-indigo-500 via-emerald-500 to-pink-500" />
+        <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-linear-to-r from-indigo-500 via-emerald-500 to-pink-500" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-20 grid grid-cols-[auto_1fr_auto] items-center gap-6">
@@ -62,13 +62,13 @@ export default function Header({ cartCount: cartCountProp, onToggleSidebar, onTo
                 <svg className="w-6 h-6 text-slate-700 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
-                <span className="pointer-events-none absolute -inset-1 -z-10 rounded-xl bg-gradient-to-r from-indigo-500/0 via-emerald-500/0 to-pink-500/0 opacity-0 blur transition-all group-hover:opacity-30 group-hover:from-indigo-500/20 group-hover:via-emerald-500/20 group-hover:to-pink-500/20" />
+                <span className="pointer-events-none absolute -inset-1 -z-10 rounded-xl bg-linear-to-r from-indigo-500/0 via-emerald-500/0 to-pink-500/0 opacity-0 blur transition-all group-hover:opacity-30 group-hover:from-indigo-500/20 group-hover:via-emerald-500/20 group-hover:to-pink-500/20" />
               </button>
 
               <Link to="/" className="flex items-center gap-3 group">
                 <img src={logo} alt="Etronix" className="h-10 w-auto rounded-xl bg-white" />
                 <div className="hidden md:block leading-tight">
-                  <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-emerald-600 to-pink-600 bg-clip-text text-transparent">
+                  <span className="text-2xl font-extrabold tracking-tight bg-linear-to-r from-indigo-600 via-emerald-600 to-pink-600 bg-clip-text text-transparent">
                     ETRONIX
                   </span>
                   <p className="text-[11px] font-semibold text-slate-500 tracking-widest">TECHNOLOGY STORE</p>
@@ -91,14 +91,14 @@ export default function Header({ cartCount: cartCountProp, onToggleSidebar, onTo
                     className="relative text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
                   >
                     <span>{item.label}</span>
-                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-indigo-500 via-emerald-500 to-pink-500 transition-all group/link-hover:w-full" />
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-linear-to-r from-indigo-500 via-emerald-500 to-pink-500 transition-all group/link-hover:w-full" />
                   </Link>
                 ))}
               </nav>
 
               {/* Search con borde degradado */}
               <form onSubmit={onSearchSubmit} className="hidden md:block min-w-[340px]">
-                <div className="p-[2px] rounded-full bg-gradient-to-r from-indigo-500 via-emerald-500 to-pink-500">
+                <div className="p-0.5 rounded-full bg-linear-to-r from-indigo-500 via-emerald-500 to-pink-500">
                   <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5">
                     <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z" />
@@ -126,7 +126,7 @@ export default function Header({ cartCount: cartCountProp, onToggleSidebar, onTo
                 href="https://wa.me/573207208410"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:brightness-110 bg-gradient-to-r from-emerald-600 via-green-500 to-lime-500"
+                className="hidden md:inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:brightness-110 bg-linear-to-r from-emerald-600 via-green-500 to-lime-500"
                 aria-label="Abrir WhatsApp de soporte"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -147,9 +147,9 @@ export default function Header({ cartCount: cartCountProp, onToggleSidebar, onTo
                 {cartCount > 0 && (
                   <span
                     className="
-                      absolute -top-1.5 -right-1.5 flex h-5 min-w-[1.25rem] items-center justify-center
+                      absolute -top-1.5 -right-1.5 flex h-5 min-w-5 items-center justify-center
                       rounded-full px-1 text-[11px] font-bold text-white
-                      bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-pink-600
+                      bg-linear-to-r from-indigo-600 via-fuchsia-600 to-pink-600
                       shadow-sm
                     "
                   >

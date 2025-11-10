@@ -47,7 +47,7 @@ export default function Sidebar({ open = false, onClose }) {
       {/* Overlay con blur */}
       <div
         className={`
-          fixed inset-0 z-[48] transition-opacity duration-300
+          fixed inset-0 z-48 transition-opacity duration-300
           ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}
         `}
         aria-hidden="true"
@@ -59,7 +59,7 @@ export default function Sidebar({ open = false, onClose }) {
       {/* Contenedor con borde degradado */}
       <aside
         className={`
-          fixed top-0 left-0 z-[49] h-screen w-[22rem] max-w-[92vw]
+          fixed top-0 left-0 z-49 h-screen w-88 max-w-[92vw]
           transform transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
@@ -68,7 +68,7 @@ export default function Sidebar({ open = false, onClose }) {
         aria-modal="true"
       >
         {/* Borde degradado */}
-        <div className="h-full p-[2px] bg-gradient-to-b from-indigo-500 via-emerald-500 to-pink-500 rounded-r-2xl shadow-2xl">
+        <div className="h-full p-0.5 bg-linear-to-b from-indigo-500 via-emerald-500 to-pink-500 rounded-r-2xl shadow-2xl">
           {/* Panel interior glass */}
           <div
             ref={panelRef}
@@ -77,14 +77,14 @@ export default function Sidebar({ open = false, onClose }) {
             {/* Header del panel */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/60">
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-100 via-emerald-100 to-pink-100">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-linear-to-br from-indigo-100 via-emerald-100 to-pink-100">
                   <span className="material-symbols-outlined text-[20px] text-indigo-600">menu</span>
                 </span>
                 <div className="leading-tight">
                   <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">
                     Menú
                   </p>
-                  <h2 className="text-base font-extrabold bg-gradient-to-r from-indigo-600 via-emerald-600 to-pink-600 bg-clip-text text-transparent">
+                  <h2 className="text-base font-extrabold bg-linear-to-r from-indigo-600 via-emerald-600 to-pink-600 bg-clip-text text-transparent">
                     Navegación rápida
                   </h2>
                 </div>
@@ -210,7 +210,7 @@ export default function Sidebar({ open = false, onClose }) {
                 </section>
 
                 {/* Línea decorativa */}
-                <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+                <div className="h-px bg-linear-to-r from-transparent via-slate-200 to-transparent" />
 
                 {/* Bloque: Atajos útiles */}
                 <section>
@@ -229,7 +229,7 @@ export default function Sidebar({ open = false, onClose }) {
 
             {/* Footer pequeño con CTA */}
             <div className="px-5 py-4 border-t border-white/60">
-              <div className="rounded-xl p-[1px] bg-gradient-to-r from-indigo-500 via-emerald-500 to-pink-500">
+              <div className="rounded-xl p-px bg-linear-to-r from-indigo-500 via-emerald-500 to-pink-500">
                 <a
                   href="https://wa.me/573207208410"
                   target="_blank"
@@ -263,7 +263,7 @@ export default function Sidebar({ open = false, onClose }) {
 function HeaderLabel({ title }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="h-5 w-1.5 rounded-full bg-gradient-to-b from-indigo-500 via-emerald-500 to-pink-500" />
+      <span className="h-5 w-1.5 rounded-full bg-linear-to-b from-indigo-500 via-emerald-500 to-pink-500" />
       <p className="text-xs uppercase tracking-wider text-slate-500 font-extrabold">{title}</p>
     </div>
   );
@@ -275,7 +275,7 @@ function IconDot({ activeClass = "from-indigo-600 via-emerald-600 to-pink-600" }
       aria-hidden="true"
       className={`relative grid place-items-center overflow-hidden rounded-full h-2.5 w-2.5`}
     >
-      <span className={`absolute inset-0 rounded-full bg-gradient-to-r ${activeClass} opacity-80`} />
+      <span className={`absolute inset-0 rounded-full bg-linear-to-r ${activeClass} opacity-80`} />
       <span className="relative h-1.5 w-1.5 rounded-full bg-white/90" />
     </span>
   );
@@ -286,7 +286,7 @@ function QuickLink({ to, icon, label, gradient = "from-indigo-500 to-pink-500" }
     <Link
       to={to}
       className={`
-        group rounded-xl p-[1px] bg-gradient-to-r ${gradient}
+        group rounded-xl p-px bg-linear-to-r ${gradient}
         transition-all hover:-translate-y-0.5 hover:shadow-lg
       `}
     >
