@@ -4,95 +4,187 @@ import logo from "../assets/logoEtronixBordesRedondos.svg";
 
 export default function Header({ cartCount: cartCountProp, onToggleSidebar, onToggleCart }) {
   const [cartCount, setCartCount] = useState(cartCountProp ?? 0);
+  const [query, setQuery] = useState("");
 
-  // Lee el carrito desde localStorage y escucha cambios para mantenerlo sincronizado
+  // Sincroniza el carrito con localStorage y eventos custom
   useEffect(() => {
     const readCart = () => {
       try {
-        const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const cart = JSON.parse(localStorage.getItem("cart") || "[]");
         const totalItems = cart.reduce((a, i) => a + (i.quantity || 0), 0);
         setCartCount(totalItems);
       } catch {
         setCartCount(0);
       }
     };
-
     readCart();
-    const onStorage = (e) => {
-      if (e.key === 'cart') readCart();
-    };
+    const onStorage = (e) => e.key === "cart" && readCart();
     const onCustom = () => readCart();
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('cartUpdated', onCustom);
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("cartUpdated", onCustom);
     return () => {
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('cartUpdated', onCustom);
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("cartUpdated", onCustom);
     };
   }, []);
 
+  const onSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!query.trim()) return;
+    // navega a tu tienda con querystring
+    window.location.href = `/shop?search=${encodeURIComponent(query.trim())}`;
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Izquierda: botón menú + Logo */}
-          <div className="flex items-center gap-4">
-            <button
-              onClick={onToggleSidebar}
-              className="p-2 rounded-md hover:bg-gray-100 text-secondary-700 transition-colors"
-              aria-label="Abrir menú"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
+    <>
 
-            {/* Logo y marca - Estilo corporativo */}
-            <Link to="/" className="flex items-center gap-3 group">
-              <img src={logo} alt="Etronix" className="h-10 w-auto" />
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-primary-600 font-display tracking-tight">
-                  ETRONIX
-                </h1>
-                <p className="text-xs text-secondary-500 font-medium tracking-wide">
-                  TECHNOLOGY STORE
-                </p>
-              </div>
-            </Link>
-          </div>
+      {/* Header sticky tipo glass con borde degradado */}
+      <header
+        className="
+          sticky top-0 z-50
+          supports-[backdrop-filter]:bg-white/70 bg-white
+          supports-[backdrop-filter]:backdrop-blur-xl
+          border-b border-white/50 shadow-sm
+        "
+      >
+        {/* línea inferior con gradiente (detalle premium) */}
+        <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-indigo-500 via-emerald-500 to-pink-500" />
 
-          {/* Derecha: acciones */}
-          <div className="flex items-center gap-2">
-            {/* Carrito */}
-            <button 
-              onClick={onToggleCart}
-              className="relative p-2.5 text-secondary-700 hover:text-primary-600 hover:bg-primary-50 rounded-md transition-all"
-              aria-label="Ver carrito"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs font-bold text-white">
-                  {cartCount > 9 ? '9+' : cartCount}
-                </span>
-              )}
-            </button>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-20 grid grid-cols-[auto_1fr_auto] items-center gap-6">
+            {/* Izquierda: menú + marca */}
+            <div className="flex items-center gap-4">
+              <button
+                onClick={onToggleSidebar}
+                className="group relative p-2.5 rounded-xl border border-slate-200/70 hover:border-slate-300 transition-all bg-white/70 hover:bg-white shadow-sm"
+                aria-label="Abrir menú"
+              >
+                <svg className="w-6 h-6 text-slate-700 group-hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <span className="pointer-events-none absolute -inset-1 -z-10 rounded-xl bg-gradient-to-r from-indigo-500/0 via-emerald-500/0 to-pink-500/0 opacity-0 blur transition-all group-hover:opacity-30 group-hover:from-indigo-500/20 group-hover:via-emerald-500/20 group-hover:to-pink-500/20" />
+              </button>
 
-            {/* Botón WhatsApp - Corporativo */}
-            <a 
-              href="https://wa.me/573207208410"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors font-medium text-sm shadow-sm"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              <span className="hidden lg:inline font-semibold">Soporte</span>
-            </a>
+              <Link to="/" className="flex items-center gap-3 group">
+                <img src={logo} alt="Etronix" className="h-10 w-auto rounded-xl bg-white" />
+                <div className="hidden md:block leading-tight">
+                  <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-emerald-600 to-pink-600 bg-clip-text text-transparent">
+                    ETRONIX
+                  </span>
+                  <p className="text-[11px] font-semibold text-slate-500 tracking-widest">TECHNOLOGY STORE</p>
+                </div>
+              </Link>
+            </div>
+
+            {/* Centro: navegación + buscador */}
+            <div className="flex items-center justify-left gap-6">
+              {/* Nav PC-first */}
+              <nav className="hidden lg:flex items-center gap-6">
+                {[
+                  { to: "/", label: "Inicio" },
+                  { to: "/shop", label: "Catálogo" },
+                  { to: "/offers", label: "Ofertas" },
+                ].map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className="relative text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
+                  >
+                    <span>{item.label}</span>
+                    <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-gradient-to-r from-indigo-500 via-emerald-500 to-pink-500 transition-all group/link-hover:w-full" />
+                  </Link>
+                ))}
+              </nav>
+
+              {/* Search con borde degradado */}
+              <form onSubmit={onSearchSubmit} className="hidden md:block min-w-[340px]">
+                <div className="p-[2px] rounded-full bg-gradient-to-r from-indigo-500 via-emerald-500 to-pink-500">
+                  <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5">
+                    <svg className="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z" />
+                    </svg>
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      type="search"
+                      placeholder="Buscar productos (Ctrl /)"
+                      className="w-full bg-transparent placeholder-slate-400 text-slate-800 text-sm focus:outline-none"
+                      aria-label="Buscar productos"
+                    />
+                    <kbd className="hidden lg:inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-0.5 text-[10px] font-medium text-slate-500">
+                      Ctrl <span>/</span>
+                    </kbd>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Derecha: acciones */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* WhatsApp CTA con gradiente */}
+              <a
+                href="https://wa.me/573207208410"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden md:inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:brightness-110 bg-gradient-to-r from-emerald-600 via-green-500 to-lime-500"
+                aria-label="Abrir WhatsApp de soporte"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347" />
+                </svg>
+                <span>Soporte</span>
+              </a>
+
+              {/* Carrito */}
+              <button
+                onClick={onToggleCart}
+                className="relative rounded-xl border border-slate-200/70 bg-white/70 p-2.5 hover:border-slate-300 hover:bg-white transition-all"
+                aria-label="Ver carrito"
+              >
+                <svg className="w-6 h-6 text-slate-700 hover:text-indigo-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                {cartCount > 0 && (
+                  <span
+                    className="
+                      absolute -top-1.5 -right-1.5 flex h-5 min-w-[1.25rem] items-center justify-center
+                      rounded-full px-1 text-[11px] font-bold text-white
+                      bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-pink-600
+                      shadow-sm
+                    "
+                  >
+                    {cartCount > 9 ? "9+" : cartCount}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Atajo de teclado para enfocar el buscador (Ctrl + /) */}
+      <ScriptlessHotkey onPress={() => {
+        const el = document.querySelector('input[placeholder*="Buscar productos"]');
+        if (el) el.focus();
+      }} />
+    </>
   );
+}
+
+/**
+ * Pequeño helper para atajo de teclado sin dependencias
+ * Ctrl + / -> enfoca el buscador
+ */
+function ScriptlessHotkey({ onPress }) {
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.ctrlKey && e.key === "/") {
+        e.preventDefault();
+        onPress?.();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onPress]);
+  return null;
 }

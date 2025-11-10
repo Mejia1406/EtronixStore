@@ -2,7 +2,9 @@ import { Link } from "react-router-dom";
 import { useState, useEffect, lazy, Suspense } from "react";
 import { Helmet } from "react-helmet-async";
 const FAQ = lazy(() => import("../components/FAQ"));
-import logo from "../assets/LogoEtronixBordesRedondos.svg";
+
+// Usa tu imagen de héroe real (mockup del celular). Si no tienes aún, temporalmente usa el logo
+import hero from "../assets/LogoEtronixBordesRedondos.svg";
 
 export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -13,212 +15,101 @@ export default function Home() {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const data = await res.json();
-        setFeaturedProducts(data.slice(0, 3));
+        setFeaturedProducts(Array.isArray(data) ? data.slice(0, 5) : []);
       } catch (error) {
         console.error("Error cargando productos:", error);
+        setFeaturedProducts([]);
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const categories = [
-    {
-      id: 'celulares',
-      name: "Celulares",
-      description: "Últimos modelos",
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-        </svg>
-      )
-    },
-    {
-      id: 'audifonos',
-      name: "Audífonos",
-      description: "Calidad premium",
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-        </svg>
-      )
-    },
-    {
-      id: 'cargadores',
-      name: "Cargadores",
-      description: "Carga rápida",
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      )
-    },
-    {
-      id: 'accesorios',
-      name: "Accesorios",
-      description: "Todo lo que necesitas",
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
-      )
-    }
-  ];
-
-  const benefits = [
-    {
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-        </svg>
-      ),
-      title: "Garantía Extendida",
-      description: "12 meses de garantía en todos nuestros productos"
-    },
-    {
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-      title: "Mejores Precios",
-      description: "Productos originales a precios competitivos"
-    },
-    {
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-        </svg>
-      ),
-      title: "Pago Seguro",
-      description: "Integración con Mercado Pago para tu seguridad"
-    },
-    {
-      icon: (
-        <svg aria-hidden="true" focusable="false" className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-        </svg>
-      ),
-      title: "Soporte 24/7",
-      description: "Atención personalizada vía WhatsApp"
-    }
-  ];
+  // Etiquetas tipo template (si tu API trae tags/flags, cámbialo a product.tag)
+  const badges = ["BEST", "NEW", "SALE", "HOT", "NEW"];
 
   return (
     <>
       <Helmet>
         <title>Etronix Store – Accesorios para celulares y tecnología | Tienda Online Colombia</title>
-        <meta name="description" content="Encuentra los mejores accesorios para celulares en Colombia: audífonos inalámbricos, cargadores rápidos, cables, protectores de pantalla y más. Envío gratis en compras superiores a $100.000. Garantía extendida y pago seguro con Mercado Pago." />
-        <meta name="keywords" content="accesorios celulares, audífonos inalámbricos, cargadores rápidos, cables USB-C, protectores pantalla, fundas celular, tecnología Colombia, tienda online" />
-        
-        {/* Open Graph */}
+        <meta name="description" content="Accesorios para celulares en Colombia: audífonos, cargadores, cables y más. Envío gratis desde $100.000. Garantía extendida y pago seguro." />
+        <meta name="keywords" content="accesorios celulares, audífonos, cargadores, cables, protectores, fundas, tecnología Colombia, tienda online" />
         <meta property="og:title" content="Etronix Store – Accesorios Tecnológicos Premium en Colombia" />
-        <meta property="og:description" content="Los mejores accesorios para celulares con envío a toda Colombia. Garantía extendida, pago seguro y soporte 24/7." />
+        <meta property="og:description" content="Accesorios para celulares con envío a toda Colombia. Garantía extendida, pago seguro y soporte 24/7." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://etronix-store.com/" />
         <meta property="og:image" content="https://etronix-store.com/og-image.jpg" />
-        
-        {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Etronix Store – Accesorios para celulares" />
         <meta name="twitter:description" content="Audífonos, cargadores, cables y más con garantía extendida" />
-        
-        {/* Schema.org JSON-LD */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "Etronix Store",
-            "url": "https://etronix-store.com",
-            "potentialAction": {
+            name: "Etronix Store",
+            url: "https://etronix-store.com",
+            potentialAction: {
               "@type": "SearchAction",
-              "target": "https://etronix-store.com/shop?search={search_term_string}",
-              "query-input": "required name=search_term_string"
-            }
+              target: "https://etronix-store.com/shop?search={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
           })}
         </script>
-        
         <link rel="canonical" href="https://etronix-store.com/" />
       </Helmet>
 
-      <main className="min-h-screen bg-gray-50">
-        {/* Hero Section Corporativo */}
-        <section className="relative bg-gradient-to-br from-primary-50 via-white to-secondary-50 overflow-hidden">
-          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 relative">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Contenido */}
-              <div className="space-y-8">
-                <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 rounded-full border border-green-300 shadow-sm">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-semibold text-green-700">Envío gratis en compras superiores a $100.000</span>
-                </div>
-                
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-secondary-900 leading-tight font-display">
-                  Tecnología Premium<br/>
-                  <span className="text-primary-600">para tu Vida Digital</span>
-                </h1>
-                
-                <p className="text-lg sm:text-xl text-secondary-600 leading-relaxed">
-                  Descubre nuestra selección de celulares, audífonos y accesorios de las mejores marcas. 
-                  Calidad garantizada y atención personalizada.
+      <main className="min-h-screen bg-white">
+        {/* ---------- HERO (estilo referencia: texto izq, imagen der) ---------- */}
+        <section className="relative">
+          {/* fondo limpio con ligera sombra superior */}
+          <div className="absolute inset-x-0 top-0 h-10 bg-gradient-to-b from-black/5 to-transparent pointer-events-none" />
+          <div className="max-w-7xl mx-auto px-6 lg:px-8 py-14 lg:py-20">
+            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+              {/* Texto */}
+              <div className="order-2 lg:order-1">
+                <p className="text-[12px] tracking-[0.2em] font-semibold text-slate-500 uppercase">
+                  Renovar
                 </p>
-                
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <h1 className="mt-3 text-4xl lg:text-6xl font-black leading-[1.05] text-[#1A1A1A]">
+                  Actualiza tu{" "}
+                  <span className="text-[#0056D2]">mundo móvil</span>
+                </h1>
+                <p className="mt-4 text-slate-600 text-lg max-w-xl">
+                  Calidad real, envíos rápidos y pagos seguros. Celulares, cargadores, cables y más para tu día a día.
+                </p>
+
+                <div className="mt-8 flex flex-wrap gap-3">
                   <Link
                     to="/shop"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary-600 text-white rounded-lg font-semibold text-base hover:bg-primary-700 transition-all shadow-corporate hover:shadow-lg transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-600"
+                    className="inline-flex items-center gap-2 rounded-lg px-6 py-3 text-white font-semibold shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md bg-[#007BFF] hover:bg-[#006AE6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#007BFF]"
                   >
-                    Explorar Catálogo
-                    <svg aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    Explorar ahora
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </Link>
-                  
-                  <a
-                    href="https://wa.me/573001234567"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="Abrir WhatsApp para asesoría"
-                    className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-secondary-900 rounded-lg font-semibold text-base border-2 border-secondary-200 hover:border-green-500 hover:bg-green-50 hover:text-green-700 transition-all shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
-                  >
-                    <svg aria-hidden="true" focusable="false" className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                    Asesoría Personalizada
-                  </a>
-                </div>
 
-                {/* Stats Empresariales */}
-                <div className="grid grid-cols-3 gap-6 pt-8">
-                  <div className="text-center p-5 bg-white rounded-xl shadow-soft border border-secondary-100">
-                    <p className="text-3xl font-bold text-primary-600 font-display">500+</p>
-                    <p className="text-sm text-secondary-600 mt-1 font-medium">Productos</p>
-                  </div>
-                  <div className="text-center p-5 bg-white rounded-xl shadow-soft border border-secondary-100">
-                    <p className="text-3xl font-bold text-primary-600 font-display">1K+</p>
-                    <p className="text-sm text-secondary-600 mt-1 font-medium">Clientes</p>
-                  </div>
-                  <div className="text-center p-5 bg-white rounded-xl shadow-soft border border-secondary-100">
-                    <p className="text-3xl font-bold text-primary-600 font-display">100%</p>
-                    <p className="text-sm text-secondary-600 mt-1 font-medium">Garantía</p>
-                  </div>
+                  <Link
+                    to="/offers"
+                    className="inline-flex items-center gap-2 rounded-lg px-6 py-3 font-semibold shadow-sm transition-all hover:-translate-y-0.5 border border-slate-200 text-[#1A1A1A] bg-white hover:bg-slate-50"
+                  >
+                    Ver ofertas
+                  </Link>
                 </div>
               </div>
-              
-              {/* Imagen */}
-              <div className="hidden lg:block">
+
+              {/* Imagen producto / mockup */}
+              <div className="order-1 lg:order-2">
                 <div className="relative">
-                  <div aria-hidden="true" className="absolute -inset-4 bg-gradient-to-r from-primary-100 via-accent-100 to-primary-200 rounded-3xl opacity-30 blur-2xl"></div>
+                  {/* “pedestal” minimal */}
+                  <div className="absolute -inset-x-6 -bottom-8 h-40 bg-white/80 rounded-[2rem] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.25)] -z-10" />
                   <img
-                    src={logo}
-                    alt="Logo de Etronix - Tienda de tecnología"
-                    width="800"
-                    height="800"
+                    src={hero}
+                    alt="Hero Etronix"
+                    className="w-full h-auto rounded-[1.25rem] object-contain"
                     loading="eager"
                     decoding="async"
                     fetchPriority="high"
-                    className="relative w-full h-auto rounded-3xl shadow-2xl border-4 border-white"
                   />
                 </div>
               </div>
@@ -226,180 +117,103 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Categories Section Profesional */}
-        <section className="py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <span className="inline-block px-4 py-2 bg-primary-100 text-primary-700 rounded-full text-sm font-semibold mb-4">
-                NUESTRAS CATEGORÍAS
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-secondary-900 mb-4 font-display">
-                Encuentra lo que Necesitas
-              </h2>
-              <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
-                Productos organizados por categoría para una experiencia de compra más eficiente
-              </p>
+        {/* ---------- FEATURED STRIP (fila de tarjetas al estilo referencia) ---------- */}
+        <section className="pb-20">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-6">
+              <div>
+                <p className="text-[12px] tracking-[0.2em] font-semibold text-slate-500 uppercase">
+                  Destacados
+                </p>
+                <h2 className="text-2xl lg:text-3xl font-extrabold text-[#1A1A1A]">
+                  Lo mejor para empezar
+                </h2>
+              </div>
+              <Link
+                to="/shop"
+                className="hidden md:inline-flex text-sm font-semibold text-[#0056D2] hover:underline"
+              >
+                Ver todo
+              </Link>
             </div>
-            
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              {categories.map((category) => {
-                return (
-                  <Link
-                    key={category.id}
-                    to={`/shop?cat=${category.id}`}
-                    className="group relative bg-white rounded-2xl p-8 text-center border-2 border-secondary-200 hover:border-primary-600 hover:shadow-corporate transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-600"
-                  >
-                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-secondary-50 text-secondary-600 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 mb-6">
-                      {category.icon}
-                    </div>
-                    <h3 className="text-xl font-bold text-secondary-900 mb-2 font-display">{category.name}</h3>
-                    <p className="text-sm text-secondary-600">{category.description}</p>
-                    <div aria-hidden="true" className="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg className="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
 
-        {/* Featured Products */}
-        <section className="py-24 bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <span className="inline-block px-4 py-2 bg-accent-100 text-accent-700 rounded-full text-sm font-semibold mb-4">
-                LO MÁS VENDIDO
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-secondary-900 mb-4 font-display">
-                Productos Destacados
-              </h2>
-              <p className="text-lg text-secondary-600 max-w-2xl mx-auto">
-                Los favoritos de nuestros clientes, seleccionados especialmente para ti
-              </p>
-            </div>
-            
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-white rounded-2xl border-2 border-secondary-200 p-6 animate-pulse">
-                    <div className="aspect-square bg-secondary-100 rounded-xl mb-4"></div>
-                    <div className="h-6 bg-secondary-100 rounded mb-3"></div>
-                    <div className="h-4 bg-secondary-100 rounded w-2/3 mb-4"></div>
-                    <div className="h-12 bg-secondary-100 rounded"></div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="rounded-2xl bg-white border border-slate-200 p-4 shadow-sm">
+                    <div className="aspect-[4/5] bg-slate-100 rounded-xl mb-3" />
+                    <div className="h-4 w-3/4 bg-slate-100 rounded mb-2" />
+                    <div className="h-4 w-1/2 bg-slate-100 rounded" />
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {featuredProducts.map((product, idx) => (
-                  <div 
-                    key={product._id}
-                    className="group bg-white rounded-2xl border-2 border-secondary-200 overflow-hidden hover:border-primary-600 hover:shadow-corporate transition-all duration-300"
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                {featuredProducts.map((p, idx) => (
+                  <article
+                    key={p._id || idx}
+                    className="group relative rounded-2xl bg-white border border-slate-200 p-4 shadow-[0_10px_30px_-15px_rgba(0,0,0,0.15)] hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.25)] transition-all"
                   >
-                    <div className="relative aspect-square overflow-hidden bg-secondary-50">
-                      {idx === 0 && (
-                        <span className="absolute top-4 left-4 z-10 px-4 py-2 rounded-lg bg-secondary-900 text-white text-xs font-bold tracking-wide">
-                          MÁS VENDIDO
-                        </span>
-                      )}
-                      {idx === 1 && (
-                        <span className="absolute top-4 left-4 z-10 px-4 py-2 rounded-lg bg-primary-600 text-white text-xs font-bold tracking-wide">
-                          NUEVO
-                        </span>
-                      )}
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.title}
-                          loading="lazy"
-                          decoding="async"
-                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 motion-reduce:transform-none motion-reduce:transition-none"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg aria-hidden="true" focusable="false" className="w-20 h-20 text-secondary-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                          </svg>
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="p-6">
-                      <h3 className="text-xl font-bold text-secondary-900 mb-2 line-clamp-1 font-display">
-                        {product.title}
-                      </h3>
-                      <p className="text-secondary-600 text-sm mb-6 line-clamp-2 min-h-[40px]">
-                        {product.description}
-                      </p>
-                      
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-2xl font-bold text-primary-600 font-display">
-                            ${product.price?.toLocaleString("es-CO")}
-                          </p>
-                          {product.stock > 0 && product.stock < 5 && (
-                            <p className="text-xs text-amber-600 font-semibold mt-1">
-                              Últimas {product.stock} unidades
-                            </p>
-                          )}
-                        </div>
-                        <Link
-                          to={`/products/${product._id}`}
-                          aria-label={`Ver detalles de ${product.title}`}
-                          className="px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-primary-600"
-                        >
-                          Ver Más
-                        </Link>
+                    {/* badge */}
+                    <span
+                      className={`
+                        absolute top-3 left-3 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide text-white
+                        ${badges[idx % badges.length] === "SALE" ? "bg-[#FF4D4F]" : badges[idx % badges.length] === "NEW" ? "bg-[#00B578]" : badges[idx % badges.length] === "HOT" ? "bg-[#FF8A00]" : "bg-[#0056D2]"}
+                      `}
+                    >
+                      {badges[idx % badges.length]}
+                    </span>
+
+                    <Link to={`/products/${p._id}`} className="block">
+                      <div className="aspect-[4/5] rounded-xl bg-slate-50 overflow-hidden mb-3">
+                        {p.image ? (
+                          <img
+                            src={p.image}
+                            alt={p.title}
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        ) : null}
                       </div>
-                    </div>
-                  </div>
+                      <h3 className="text-[15px] font-semibold text-[#1A1A1A] line-clamp-1">{p.title}</h3>
+                      <p className="mt-1 text-[13px] text-slate-500 line-clamp-2 min-h-[34px]">
+                        {p.description || "Producto de alta calidad con garantía."}
+                      </p>
+                      <div className="mt-3 flex items-center justify-between">
+                        <span className="text-[17px] font-extrabold text-[#007BFF]">
+                          {typeof p.price === "number" ? `$${p.price.toLocaleString("es-CO")}` : "—"}
+                        </span>
+                        <span className="text-xs text-slate-500">Ver más →</span>
+                      </div>
+                    </Link>
+                  </article>
                 ))}
               </div>
             )}
-            
-            <div className="text-center mt-16">
-              <Link
-                to="/shop"
-                className="inline-flex items-center gap-2 px-10 py-4 border-2 border-secondary-900 text-secondary-900 rounded-lg font-bold hover:bg-secondary-900 hover:text-white transition-all shadow-sm hover:shadow-md transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary-900"
-              >
-                Ver Todo el Catálogo
-                <svg aria-hidden="true" focusable="false" className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
-            </div>
           </div>
         </section>
 
-        {/* Benefits Section Corporativo */}
-        <section className="py-24 bg-white border-y border-secondary-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-              {benefits.map((benefit, idx) => (
-                <div 
-                  key={idx}
-                  className="text-center group"
-                >
-                  <div className="inline-flex items-center justify-center w-18 h-18 rounded-2xl bg-primary-100 text-primary-600 mb-6 group-hover:bg-primary-600 group-hover:text-white transition-all duration-300 shadow-soft">
-                    {benefit.icon}
-                  </div>
-                  <h3 className="text-lg font-bold text-secondary-900 mb-3 font-display">
-                    {benefit.title}
-                  </h3>
-                  <p className="text-secondary-600 text-sm leading-relaxed">
-                    {benefit.description}
-                  </p>
+        {/* ---------- BENEFICIOS (línea limpia, 4 columnas) ---------- */}
+        <section className="py-16 bg-[#F8F9FA]">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { t: "Garantía 12 meses", d: "Cobertura real en Colombia" },
+                { t: "Pago seguro", d: "Mercado Pago, PSE, tarjetas" },
+                { t: "Entrega rápida", d: "Envíos a todo el país" },
+                { t: "Soporte humano", d: "WhatsApp cuando lo necesites" },
+              ].map((b, i) => (
+                <div key={i} className="rounded-2xl bg-white border border-slate-200 p-6 text-center shadow-sm">
+                  <p className="text-[15px] font-extrabold text-[#1A1A1A]">{b.t}</p>
+                  <p className="mt-1 text-sm text-slate-500">{b.d}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
+        {/* ---------- FAQ ---------- */}
         <Suspense fallback={null}>
           <FAQ />
         </Suspense>
