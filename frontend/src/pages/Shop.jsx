@@ -83,9 +83,63 @@ export default function Shop() {
   return (
     <>
       <Helmet>
-        <title>Tienda de Accesorios | Etronix Store</title>
-        <meta name="description" content="Explora nuestro catálogo completo..." />
-        <link rel="canonical" href="https://etronix-store.com/shop" />
+        <title>
+          {selectedCategory === 'all'
+            ? 'Tienda de Accesorios | Etronix Store'
+            : `${CATEGORIES.find(c => c.id === selectedCategory)?.name} | Etronix Store`
+          }
+        </title>
+        <meta
+          name="description"
+          content={
+            selectedCategory === 'all'
+              ? 'Explora nuestro catálogo completo de accesorios tecnológicos: audífonos, cargadores, cables, protectores y más. Envío a toda Colombia.'
+              : `Compra ${CATEGORIES.find(c => c.id === selectedCategory)?.name} de alta calidad. Envío rápido y garantía extendida en todos los productos.`
+          }
+        />
+        <link rel="canonical" href={`https://etronix-store.com/shop${selectedCategory !== 'all' ? `?cat=${selectedCategory}` : ''}`} />
+
+        {/* Schema.org CollectionPage */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": selectedCategory === 'all'
+              ? 'Todos los Productos - Etronix Store'
+              : `${CATEGORIES.find(c => c.id === selectedCategory)?.name} - Etronix Store`,
+            "description": selectedCategory === 'all'
+              ? 'Catálogo completo de accesorios tecnológicos'
+              : `Productos de ${CATEGORIES.find(c => c.id === selectedCategory)?.name}`,
+            "url": `https://etronix-store.com/shop${selectedCategory !== 'all' ? `?cat=${selectedCategory}` : ''}`,
+            "mainEntity": {
+              "@type": "ItemList",
+              "numberOfItems": filteredProducts.length,
+              "itemListElement": filteredProducts.slice(0, 12).map((product, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "item": {
+                  "@type": "Product",
+                  "name": product.title,
+                  "image": product.image || 'https://etronix-store.com/og-image.jpg',
+                  "description": product.description || product.title,
+                  "offers": {
+                    "@type": "Offer",
+                    "url": `https://etronix-store.com/products/${product._id}`,
+                    "priceCurrency": "COP",
+                    "price": product.price,
+                    "availability": product.stock > 0
+                      ? "https://schema.org/InStock"
+                      : "https://schema.org/OutOfStock",
+                    "seller": {
+                      "@type": "Organization",
+                      "name": "Etronix Store"
+                    }
+                  }
+                }
+              }))
+            }
+          })}
+        </script>
       </Helmet>
 
       <div className="min-h-screen flex flex-col bg-gray-50">
