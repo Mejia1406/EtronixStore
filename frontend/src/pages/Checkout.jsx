@@ -99,83 +99,67 @@ export default function Checkout() {
     setShowPayment(true);
   };
 
-  const onSubmitPayment = async (formData) => {
-    try {
-      setLoading(true);
-      
-      console.log("Datos del pago recibidos del CardPayment:", formData);
-      
-      // Validar que tenemos los datos necesarios
-      if (!formData.payment_method_id) {
-        console.error("payment_method_id es null o undefined");
-        alert("Error: No se detectó el método de pago. Por favor recarga la página e intenta nuevamente.");
-        setLoading(false);
-        return;
-      }
-      
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/process`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: formData.token,
-          issuer_id: formData.issuer_id,
-          payment_method_id: formData.payment_method_id,
-          transaction_amount: total,
-          installments: formData.installments || 1,
-          description: `Compra en Etronix Store`,
-          payer: {
-            email: formData.payer?.email || formData.email || formData.buyer?.email,
-            identification: formData.payer?.identification,
-            first_name: formData.payer?.first_name,
-            last_name: formData.payer?.last_name
-          },
-          buyer: {
-            name: formData.payer?.first_name && formData.payer?.last_name 
-              ? `${formData.payer.first_name} ${formData.payer.last_name}` 
-              : formData.payer?.email?.split('@')[0] || formData.buyer?.email?.split('@')[0] || "Cliente",
-            phone: "N/A",
-            email: formData.payer?.email || formData.email || formData.buyer?.email,
-            address: "N/A",
-            city: "N/A",
-            notes: ""
-          },
-          items: cart.map((item) => ({
-            productId: item._id,
-            title: item.title,
-            price: item.price,
-            unit_price: item.price,
-            quantity: item.quantity,
-          }))
-        }),
-      });
+  // DENTRO DE onSubmitPayment en Checkout.jsx
 
-      const result = await response.json();
-      
-      console.log("Respuesta del servidor:", result);
-      
-      if (result.success && result.status === "approved") {
-        localStorage.removeItem('cart');
-        navigate(`/success?order=${result.orderId}`);
-      } else {
-        let errorMsg = "El pago fue rechazado.";
-        
-        if (result.status === "rejected") {
-          errorMsg = `Pago rechazado: ${result.message || "Intenta con otra tarjeta o método de pago."}`;
-        } else if (result.status === "pending" || result.status === "in_process") {
-          errorMsg = "El pago está en proceso. Por favor verifica el estado más tarde.";
-        } else if (result.error) {
-          errorMsg = `Error: ${result.error}`;
-        }
-        
-        alert(errorMsg);
-        setLoading(false);
+  const onSubmitPayment = async (mpData) => {
+  try {
+    setLoading(true);
+    
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/process`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: mpData.token,
+        issuer_id: mpData.issuer_id,
+        payment_method_id: mpData.payment_method_id,
+        transaction_amount: total,
+        installments: mpData.installments || 1,
+        description: `Compra en Etronix Store`,
+        payer: {
+          email: mpData.payer?.email || formData.email,
+          identification: mpData.payer?.identification,
+          first_name: mpData.payer?.first_name,
+          last_name: mpData.payer?.last_name
+        },
+        buyer: {
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          address: formData.address,
+          city: formData.city,
+          notes: formData.notes
+        },
+        items: cart.map((item) => ({
+          productId: item._id,
+          title: item.title,
+          price: item.price,
+          unit_price: item.price,
+          quantity: item.quantity,
+        }))
+      }),
+    });
+
+    const result = await response.json();
+    
+    if (result.success && result.status === "approved") {
+      localStorage.removeItem('cart');
+      navigate(`/success?order=${result.orderId}`);
+    } else {
+      let errorMsg = "El pago fue rechazado.";
+      if (result.status === "rejected") {
+        errorMsg = `Pago rechazado: ${result.message || "Intenta con otra tarjeta."}`;
+      } else if (result.status === "pending") {
+        errorMsg = "El pago está en proceso.";
       }
-    } catch (error) {
-      console.error("Error procesando pago:", error);
-      alert("Error al procesar el pago. Por favor intenta nuevamente.");
+      alert(errorMsg);
       setLoading(false);
     }
-  };
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error al procesar el pago. Intenta nuevamente.");
+    setLoading(false);
+  }
+};
 
   const onErrorPayment = (error) => {
     console.error("Error en Payment Brick:", error);
