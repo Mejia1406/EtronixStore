@@ -76,12 +76,12 @@ export default function Checkout() {
       newErrors.email = "Ingresa un email válido";
     }
     
-    if (!formData.address.trim()) {
-      newErrors.address = "La dirección es obligatoria";
+    if (!formData.address.trim() || formData.address.trim().toLowerCase() === 'n/a') {
+      newErrors.address = "La dirección es obligatoria y no puede ser 'N/A'";
     }
     
-    if (!formData.city.trim()) {
-      newErrors.city = "La ciudad es obligatoria";
+    if (!formData.city.trim() || formData.city.trim().toLowerCase() === 'n/a') {
+      newErrors.city = "La ciudad es obligatoria y no puede ser 'N/A'";
     }
     
     setErrors(newErrors);

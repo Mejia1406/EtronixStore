@@ -24,8 +24,26 @@ export const createOrderSchema = Joi.object({
       .messages({
         "string.pattern.base": "El teléfono debe ser válido",
       }),
-    address: Joi.string().min(10).max(200).required(),
-    city: Joi.string().min(2).max(100).required(),
+    address: Joi.string()
+      .min(10)
+      .max(200)
+      .required()
+      .custom((value, helpers) => {
+        if (!value.trim() || value.trim().toLowerCase() === 'n/a') {
+          return helpers.error('any.invalid');
+        }
+        return value;
+      }, 'No vacío ni N/A'),
+    city: Joi.string()
+      .min(2)
+      .max(100)
+      .required()
+      .custom((value, helpers) => {
+        if (!value.trim() || value.trim().toLowerCase() === 'n/a') {
+          return helpers.error('any.invalid');
+        }
+        return value;
+      }, 'No vacío ni N/A'),
     notes: Joi.string().max(500).optional().allow(''),
   }).required(),
 });
