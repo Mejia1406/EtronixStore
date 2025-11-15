@@ -3,32 +3,33 @@
   <head>
     <meta charset="UTF-8" />
     
-    <!-- DNS Prefetch para recursos externos -->
+    <!-- DNS Prefetch solo a fuentes esenciales -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://images.unsplash.com" />
-    <link rel="dns-prefetch" href="https://api.mercadopago.com" />
-    
-    <!-- Preconnect a recursos críticos -->
+    <!-- Elimina Unsplash si no tienes imágenes principales externas del home -->
+    <!-- Elimina MercadoPago si NO hay pagos directos en la home -->
+
+    <!-- Preconnect solo a recursos críticos del primer render -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preconnect" href="https://api.mercadopago.com" crossorigin />
-    
+    <!-- Mantén MercadoPago solo si sus scripts corren en el primer render -->
+    <!-- <link rel="preconnect" href="https://api.mercadopago.com" crossorigin /> -->
+
     <!-- Favicon optimizado -->
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    
+
     <!-- Viewport optimizado -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-    
+
     <!-- Theme color para PWA -->
     <meta name="theme-color" content="#1E3A8A" />
-    
+
     <!-- SEO Meta Tags -->
     <title>Etronix Store – Accesorios para celulares y tecnología</title>
     <meta name="description" content="Encuentra los mejores accesorios para celulares: audífonos, cargadores, cables, protectores de pantalla y más. Calidad y precios accesibles." />
     <meta name="keywords" content="accesorios celulares, audífonos, cargadores, cables USB, protectores pantalla, tecnología" />
     <meta name="author" content="Etronix Store" />
-    
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://etronix-store.com/" />
@@ -37,17 +38,17 @@
     <meta property="og:image" content="/og-image.jpg" />
     <meta property="og:site_name" content="Etronix Store" />
     <meta property="og:locale" content="es_CO" />
-    
+
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content="https://etronix-store.com/" />
     <meta name="twitter:title" content="Etronix Store – Accesorios para celulares" />
     <meta name="twitter:description" content="Los mejores accesorios para celulares: audífonos, cargadores, cables y más." />
     <meta name="twitter:image" content="/og-image.jpg" />
-    
+
     <!-- Canonical URL -->
     <link rel="canonical" href="https://etronix-store.com/" />
-    
+
     <!-- JSON-LD Schema.org Organization -->
     <script type="application/ld+json">
     {
@@ -85,18 +86,17 @@
     </noscript>
     
     <!-- Preload logo crítico -->
-    <link rel="preload" as="image" href="/src/assets/logoEtronixBordesRedondos.svg" />
-    
+    <link rel="preload" as="image" href="/src/assets/logoEtronix.webp" /> <!-- Usa aquí el webp real comprimido, no SVG salvo que sea el hero -->
+
     <!-- Prefetch rutas importantes -->
     <link rel="prefetch" href="/shop" />
-    
-    <!-- Resource hints para mejor performance -->
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" />
+
+    <!-- Elimina lo que no sea esencial, como Cloudflare o Unsplash si no es crítico inicial -->
+    <!-- <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com" /> -->
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    
     <!-- Service Worker para PWA (opcional pero recomendado) -->
     <script>
       if ('serviceWorker' in navigator) {
