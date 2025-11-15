@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
-import { initMercadoPago, CardPayment } from '@mercadopago/sdk-react';
 import { EmptyCart } from "../components/EmptyState";
 import { Helmet } from "react-helmet-async";
-import LightRays from "../components/LightRays";
+const LightRays = lazy(() => import("../components/LightRays"));
 
 export default function Checkout() {
   const navigate = useNavigate();
@@ -11,6 +10,7 @@ export default function Checkout() {
   const [loading, setLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [mpInitialized, setMpInitialized] = useState(false);
+  const [mpModule, setMpModule] = useState(null);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -23,19 +23,25 @@ export default function Checkout() {
 
   const [errors, setErrors] = useState({});
 
+  // Inicializar MercadoPago sólo cuando el usuario continúa al pago
   useEffect(() => {
-    try {
-      const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY;
-      if (publicKey) {
-        initMercadoPago(publicKey, { locale: 'es-CO' });
+    if (!showPayment) return;
+    (async () => {
+      try {
+        const publicKey = import.meta.env.VITE_MP_PUBLIC_KEY;
+        if (!publicKey) {
+          console.error('VITE_MP_PUBLIC_KEY no está configurada');
+          return;
+        }
+        const mod = await import('@mercadopago/sdk-react');
+        mod.initMercadoPago(publicKey, { locale: 'es-CO' });
+        setMpModule(mod);
         setMpInitialized(true);
-      } else {
-        console.error('VITE_MP_PUBLIC_KEY no está configurada');
+      } catch (error) {
+        console.error('Error inicializando MercadoPago:', error);
       }
-    } catch (error) {
-      console.error('Error inicializando MercadoPago:', error);
-    }
-  }, []);
+    })();
+  }, [showPayment]);
 
   useEffect(() => {
     const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -188,18 +194,20 @@ export default function Checkout() {
     return (
       <>
         <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-r from-gray-900 via-slate-900 to-black">
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#00d4ff"
-            raysSpeed={1.5}
-            lightSpread={0.9}
-            rayLength={1.2}
-            followMouse
-            mouseInfluence={0.12}
-            noiseAmount={0.06}
-            distortion={0.03}
-            className="w-full h-full pointer-events-none opacity-70"
-          />
+          <Suspense fallback={null}>
+            <LightRays
+              raysOrigin="top-center"
+              raysColor="#00d4ff"
+              raysSpeed={1.5}
+              lightSpread={0.9}
+              rayLength={1.2}
+              followMouse
+              mouseInfluence={0.12}
+              noiseAmount={0.06}
+              distortion={0.03}
+              className="w-full h-full pointer-events-none opacity-70"
+            />
+          </Suspense>
         </div>
         <div className="relative min-h-screen flex flex-col z-10">
           <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-8 py-8 w-full">
@@ -427,16 +435,21 @@ export default function Checkout() {
                     <p className="text-gray-300">Cargando sistema de pago...</p>
                   </div>
                 ) : total > 0 ? (
-                  <CardPayment
-                    initialization={{
-                      amount: Number(total),
-                      payer: {
-                        email: formData.email
-                      }
-                    }}
-                    onSubmit={onSubmitPayment}
-                    onError={onErrorPayment}
-                  />
+                  (mpModule && mpModule.CardPayment) ? (
+                    (() => {
+                      const MPCard = mpModule.CardPayment;
+                      return (
+                        <MPCard
+                          initialization={{
+                            amount: Number(total),
+                            payer: { email: formData.email }
+                          }}
+                          onSubmit={onSubmitPayment}
+                          onError={onErrorPayment}
+                        />
+                      );
+                    })()
+                  ) : null
                 ) : (
                   <p className="text-red-400 font-bold">Error: El total debe ser mayor a 0</p>
                 )}

@@ -1,16 +1,22 @@
 // REEMPLAZAR LightRays.jsx con esta versión optimizada
 
-import { useRef, useEffect, useState } from 'react';
-import { Renderer, Program, Triangle, Mesh } from 'ogl';
+import { useRef, useEffect, useState } from "react";
+import { Renderer, Program, Triangle, Mesh } from "ogl";
 
-const hexToRgb = hex => {
+const hexToRgb = (hex) => {
   const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return m ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255] : [1, 1, 1];
+  return m
+    ? [
+        parseInt(m[1], 16) / 255,
+        parseInt(m[2], 16) / 255,
+        parseInt(m[3], 16) / 255,
+      ]
+    : [1, 1, 1];
 };
 
 const LightRays = ({
-  raysOrigin = 'top-center',
-  raysColor = '#ffffff',
+  raysOrigin = "top-center",
+  raysColor = "#ffffff",
   raysSpeed = 1,
   lightSpread = 1,
   rayLength = 2,
@@ -18,13 +24,14 @@ const LightRays = ({
   mouseInfluence = 0.1,
   noiseAmount = 0.0,
   distortion = 0.0,
-  className = ''
+  className = "",
 }) => {
   const containerRef = useRef(null);
   const rendererRef = useRef(null);
   const cleanupRef = useRef(null);
+  const uniformsRef = useRef(null); // 👈 para acceder a uniforms desde otros efectos
   const [isVisible, setIsVisible] = useState(false);
-  
+
   // OPTIMIZACIÓN 1: Solo renderizar si es visible
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -43,23 +50,23 @@ const LightRays = ({
     if (!isVisible || !containerRef.current) return;
 
     let renderer, mesh, animationId;
-    
-    const initWebGL = async () => {
+
+    const initWebGL = () => {
       // OPTIMIZACIÓN 2: DPR reducido para mejor performance
       renderer = new Renderer({
         dpr: Math.min(window.devicePixelRatio, 1.5), // Limitar a 1.5x
         alpha: true,
-        antialias: false, // Desactivar antialiasing para mejor FPS
+        antialias: false, // Mejor FPS
       });
       rendererRef.current = renderer;
 
       const gl = renderer.gl;
-      gl.canvas.style.width = '100%';
-      gl.canvas.style.height = '100%';
+      gl.canvas.style.width = "100%";
+      gl.canvas.style.height = "100%";
 
       containerRef.current.appendChild(gl.canvas);
 
-      // Shaders simplificados para mejor performance
+      // Shaders simplificados
       const vert = `
 attribute vec2 position;
 varying vec2 vUv;
@@ -147,8 +154,10 @@ void main() {
         mousePos: { value: [0.5, 0.5] },
         mouseInfluence: { value: mouseInfluence },
         noiseAmount: { value: noiseAmount },
-        distortion: { value: distortion }
+        distortion: { value: distortion },
       };
+
+      uniformsRef.current = uniforms; // 👈 guardamos referencia global a uniforms
 
       const geometry = new Triangle(gl);
       const program = new Program(gl, { vertex: vert, fragment: frag, uniforms });
@@ -161,46 +170,51 @@ void main() {
         const w = clientWidth * renderer.dpr;
         const h = clientHeight * renderer.dpr;
         uniforms.iResolution.value = [w, h];
-        
+
         // Calcular posición de rayos
         const outside = 0.2;
         let anchor, dir;
         switch (raysOrigin) {
-          case 'top-left':
-            anchor = [0, -outside * h]; dir = [0, 1]; break;
-          case 'top-right':
-            anchor = [w, -outside * h]; dir = [0, 1]; break;
+          case "top-left":
+            anchor = [0, -outside * h];
+            dir = [0, 1];
+            break;
+          case "top-right":
+            anchor = [w, -outside * h];
+            dir = [0, 1];
+            break;
           default: // top-center
-            anchor = [0.5 * w, -outside * h]; dir = [0, 1];
+            anchor = [0.5 * w, -outside * h];
+            dir = [0, 1];
         }
         uniforms.rayPos.value = anchor;
         uniforms.rayDir.value = dir;
       };
 
       updateSize();
-      window.addEventListener('resize', updateSize);
+      window.addEventListener("resize", updateSize);
 
-      // OPTIMIZACIÓN 3: Throttle de render loop (60 FPS max)
+      // OPTIMIZACIÓN 3: 60 FPS máx
       let lastTime = 0;
       const targetFPS = 60;
       const frameTime = 1000 / targetFPS;
 
       const loop = (t) => {
         const deltaTime = t - lastTime;
-        
+
         if (deltaTime >= frameTime) {
           lastTime = t - (deltaTime % frameTime);
           uniforms.iTime.value = t * 0.001;
-          
+
           try {
             renderer.render({ scene: mesh });
           } catch (err) {
-            console.warn('WebGL error:', err);
+            console.warn("WebGL error:", err);
             if (cleanupRef.current) cleanupRef.current();
             return;
           }
         }
-        
+
         animationId = requestAnimationFrame(loop);
       };
 
@@ -208,15 +222,15 @@ void main() {
 
       cleanupRef.current = () => {
         if (animationId) cancelAnimationFrame(animationId);
-        window.removeEventListener('resize', updateSize);
-        
+        window.removeEventListener("resize", updateSize);
+
         try {
           const canvas = renderer.gl.canvas;
-          const loseExt = renderer.gl.getExtension('WEBGL_lose_context');
+          const loseExt = renderer.gl.getExtension("WEBGL_lose_context");
           if (loseExt) loseExt.loseContext();
           if (canvas?.parentNode) canvas.parentNode.removeChild(canvas);
         } catch (err) {
-          console.warn('Cleanup error:', err);
+          console.warn("Cleanup error:", err);
         }
       };
     };
@@ -229,13 +243,24 @@ void main() {
         cleanupRef.current = null;
       }
     };
-  }, [isVisible, raysOrigin, raysColor, raysSpeed, lightSpread, rayLength, mouseInfluence, noiseAmount, distortion]);
+  }, [
+    isVisible,
+    raysOrigin,
+    raysColor,
+    raysSpeed,
+    lightSpread,
+    rayLength,
+    mouseInfluence,
+    noiseAmount,
+    distortion,
+  ]);
 
-  // OPTIMIZACIÓN 4: Throttle de mouse movement
+  // OPTIMIZACIÓN 4: Throttle de mouse movement (usando uniformsRef)
   useEffect(() => {
     if (!followMouse) return;
-    
-    let mouseX = 0.5, mouseY = 0.5;
+
+    let mouseX = 0.5,
+      mouseY = 0.5;
     let rafId;
 
     const handleMouseMove = (e) => {
@@ -246,17 +271,17 @@ void main() {
     };
 
     const updateMouse = () => {
-      if (rendererRef.current?.program?.uniforms) {
-        rendererRef.current.program.uniforms.mousePos.value = [mouseX, mouseY];
+      if (uniformsRef.current) {
+        uniformsRef.current.mousePos.value = [mouseX, mouseY];
       }
       rafId = requestAnimationFrame(updateMouse);
     };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
     rafId = requestAnimationFrame(updateMouse);
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [followMouse]);

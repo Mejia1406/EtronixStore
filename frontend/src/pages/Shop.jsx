@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { CATEGORIES } from "../constants/categories";
 import { NoResults, ProductSkeleton } from "../components/EmptyState";
 import { Helmet } from "react-helmet-async";
-import LightRays from "../components/LightRays";
 import OptimizedImage from '../components/OptimizedImage';
 
 

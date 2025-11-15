@@ -263,7 +263,7 @@ export default function Sidebar({ open = false, onClose }) {
       </aside>
 
       {/* Estilos para scrollbar personalizada */}
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 8px;
         }

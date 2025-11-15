@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
-export default function Chatbot() {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Chatbot({ startOpen = false, onClose } = {}) {
+  const [isOpen, setIsOpen] = useState(!!startOpen);
   const [messages, setMessages] = useState([
     {
       type: "bot",
@@ -166,7 +166,10 @@ export default function Chatbot() {
               </div>
             </div>
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                if (typeof onClose === 'function') onClose();
+              }}
               className="text-white/90 hover:text-white hover:bg-white/20 rounded-lg p-2 transition-all"
               aria-label="Cerrar chat"
             >

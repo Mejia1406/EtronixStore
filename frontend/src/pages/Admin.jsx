@@ -1,8 +1,8 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
-import AdminLogin from "../components/AdminLogin";
 import { Helmet } from "react-helmet-async";
-import LightRays from "../components/LightRays";
+const AdminLogin = lazy(() => import("../components/AdminLogin"));
+const LightRays = lazy(() => import("../components/LightRays"));
 
 export default function Admin() {
   const [orders, setOrders] = useState([]);
@@ -157,18 +157,20 @@ export default function Admin() {
     return (
       <>
         <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
-          <LightRays
-            raysOrigin="top-center"
-            raysColor="#00d4ff"
-            raysSpeed={1.5}
-            lightSpread={0.9}
-            rayLength={1.2}
-            followMouse
-            mouseInfluence={0.12}
-            noiseAmount={0.06}
-            distortion={0.03}
-            className="w-full h-full pointer-events-none opacity-70"
-          />
+          <Suspense fallback={null}>
+            <LightRays
+              raysOrigin="top-center"
+              raysColor="#00d4ff"
+              raysSpeed={1.5}
+              lightSpread={0.9}
+              rayLength={1.2}
+              followMouse
+              mouseInfluence={0.12}
+              noiseAmount={0.06}
+              distortion={0.03}
+              className="w-full h-full pointer-events-none opacity-70"
+            />
+          </Suspense>
         </div>
         <div className="relative min-h-screen flex items-center justify-center z-10">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div>
@@ -178,7 +180,11 @@ export default function Admin() {
   }
 
   if (!isAuthenticated) {
-    return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-4 border-cyan-400 border-t-transparent"></div></div>}>
+        <AdminLogin onLoginSuccess={handleLoginSuccess} />
+      </Suspense>
+    );
   }
 
   return (
