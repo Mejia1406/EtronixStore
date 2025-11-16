@@ -26,7 +26,7 @@ const getInitialProducts = () => {
 
 const ProductCard = memo(function ProductCard({ product, idx }) {
   return (
-    <article className="group relative rounded-2xl backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50">
+    <article className="group relative rounded-2xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/50">
       <Link to={`/products/${product._id}`} className="block">
         <div className="aspect-4/5 rounded-xl bg-white/5 overflow-hidden mb-4 border border-white/10">
           {product.image ? (
@@ -34,7 +34,7 @@ const ProductCard = memo(function ProductCard({ product, idx }) {
               src={product.image}
               alt={product.title}
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-              priority={idx < 2}
+              loading="lazy"
               placeholder="blur"
             />
           ) : (
@@ -140,7 +140,7 @@ export default function Home() {
       {/* ✅ Fondo SIMPLE primero (sin WebGL) */}
       <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
         {/* ✅ Solo cargar LightRays cuando el contenido principal esté listo */}
-        {showLightRays && <LazyLightRays />}
+        {/*showLightRays && <LazyLightRays />}*/}
       </div>
 
       <main className="relative min-h-screen z-10">
@@ -153,6 +153,8 @@ export default function Home() {
                   <OptimizedImage
                     src={hero}
                     alt="Logo Etronix - Accesorios tecnológicos"
+                    width={900}
+                    height={300}
                     className="absolute left-0 top-1/3 -translate-y-1/2 w-screen max-w-none lg:w-[700px] xl:w-[900px] 2xl:w-[1200px] h-auto object-left object-contain drop-shadow-[0_20px_50px_rgba(59,130,246,0.45)] z-0"
                     priority
                   />
@@ -211,7 +213,7 @@ export default function Home() {
             {loading && featuredProducts.length === 0 ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 p-4 shadow-lg animate-pulse">
+                  <div key={i} className="rounded-2xl bg-white/10 border border-white/20 p-4 shadow-lg">
                     <div className="aspect-4/5 bg-white/10 rounded-xl mb-3" />
                     <div className="h-4 w-3/4 bg-white/10 rounded mb-2" />
                     <div className="h-4 w-1/2 bg-white/10 rounded" />
@@ -235,7 +237,7 @@ export default function Home() {
               {BENEFITS.map((b, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-6 text-center shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50"
+                  className="rounded-2xl bg-linear-to-br from-white/15 to-white/5 border border-white/20 p-6 text-center shadow-xl hover:shadow-2xl hover:shadow-cyan-500/20 transition-all duration-300 hover:-translate-y-1 hover:border-cyan-400/50"
                 >
                   <div className="text-4xl mb-3">{b.icon}</div>
                   <p className="text-base font-black text-white mb-1">{b.t}</p>

@@ -16,6 +16,10 @@ export default function Shop() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toast, setToast] = useState("");
+  const [page, setPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 12;
+  // paginatedProducts depende de filteredProducts, así que debe ir después de su declaración
+  const paginatedProducts = filteredProducts.slice(0, page * PRODUCTS_PER_PAGE);
 
   useEffect(() => {
     (async () => {
@@ -59,6 +63,7 @@ export default function Shop() {
     }
 
     setFilteredProducts(filtered);
+    setPage(1); // Reinicia la paginación al filtrar
   }, [selectedCategory, debouncedQuery, products]);
 
   const addToCart = (p) => {
@@ -171,7 +176,7 @@ export default function Shop() {
                         placeholder="Buscar productos..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/10 backdrop-blur-md border-2 border-white/20 focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition-all outline-none text-white placeholder-gray-400 font-medium"
+                        className="w-full pl-12 pr-12 py-3.5 rounded-xl bg-white/10 -border-2 border-white/20 focus:border-cyan-400/50 focus:ring-2 focus:ring-cyan-400/20 transition-all outline-none text-white placeholder-gray-400 font-medium"
                       />
                       <svg
                         className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
@@ -197,7 +202,7 @@ export default function Shop() {
               {/* Botón categorías móvil */}
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden mb-6 flex items-center gap-2 px-5 py-3 backdrop-blur-md bg-white/10 rounded-xl border-2 border-white/20 hover:border-cyan-400/50 transition-all font-bold text-white"
+                className="md:hidden mb-6 flex items-center gap-2 px-5 py-3 -bg-white/10 rounded-xl border-2 border-white/20 hover:border-cyan-400/50 transition-all font-bold text-white"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -210,7 +215,7 @@ export default function Shop() {
 
               {/* Sidebar de Categorías */}
               <aside className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-full md:w-72 shrink-0`}>
-                <div className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 sticky top-24 shadow-xl">
+                <div className="bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 sticky top-24 shadow-xl">
                   <h2 className="font-black text-xl text-white mb-6 flex items-center gap-2">
                     <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
@@ -280,15 +285,15 @@ export default function Shop() {
                     {/* Contador de resultados */}
                     <div className="mb-6 flex items-center justify-between">
                       <p className="text-sm text-gray-300 font-medium">
-                        Mostrando <span className="font-black text-cyan-400">{filteredProducts.length}</span> {filteredProducts.length === 1 ? 'producto' : 'productos'}
+                        Mostrando <span className="font-black text-cyan-400">{paginatedProducts.length}</span> {paginatedProducts.length === 1 ? 'producto' : 'productos'}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredProducts.map((p) => (
+                      {paginatedProducts.map((p) => (
                         <div
                           key={p._id}
-                          className="backdrop-blur-xl bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 overflow-hidden group flex flex-col hover:-translate-y-1"
+                          className="bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 hover:border-cyan-400/50 shadow-xl hover:shadow-2xl hover:shadow-cyan-500/30 transition-all duration-300 overflow-hidden group flex flex-col hover:-translate-y-1"
                         >
                           <div className="relative aspect-square bg-white/5 overflow-hidden">
                             {/* Badge de stock */}
@@ -297,19 +302,22 @@ export default function Shop() {
                                 Últimas unidades
                               </span>
                             )}
-                            {p.image ? (
-                              <OptimizedImage
-                                src={p.image}
-                                alt={`${p.title} - ${p.category}`}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                                priority={false}
-                                placeholder="blur"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-cyan-500/20 to-blue-500/20">
-                                <span className="text-white/50 text-4xl">📱</span>
-                              </div>
-                            )}
+                              {p.image ? (
+                                <OptimizedImage
+                                  src={p.image}
+                                  alt={p.title ? `${p.title} - ${p.category}` : 'Producto Etronix'}
+                                  width={400}
+                                  height={400}
+                                  decoding="async"
+                                  loading="lazy"
+                                  className="w-full h-full object-cover transition-opacity duration-300"
+                                  style={{ background: '#e0e7ef' }}
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-cyan-100">
+                                  <span className="text-gray-400 text-4xl">📱</span>
+                                </div>
+                              )}
                           </div>
 
                           <div className="p-6 flex flex-col flex-1">
@@ -359,6 +367,17 @@ export default function Shop() {
                         </div>
                       ))}
                     </div>
+                    {/* Botón para cargar más productos */}
+                    {paginatedProducts.length < filteredProducts.length && (
+                      <div className="flex justify-center mt-8">
+                        <button
+                          onClick={() => setPage(page + 1)}
+                          className="px-8 py-4 rounded-xl bg-cyan-500 text-white font-black shadow-lg hover:bg-cyan-400 transition-all"
+                        >
+                          Cargar más productos
+                        </button>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
@@ -368,7 +387,7 @@ export default function Shop() {
 
         {/* Toast */}
         {toast && (
-          <div className="fixed bottom-8 right-8 z-50 backdrop-blur-xl bg-linear-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 flex items-center gap-3 border border-green-400/50">
+          <div className="fixed bottom-8 right-8 z-50 bg-linear-to-r from-green-500 to-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl shadow-green-500/50 flex items-center gap-3 border border-green-400/50">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/logoEtronix.webp";
+import OptimizedImage from "./OptimizedImage";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -16,7 +17,7 @@ export default function Footer() {
             <div className="flex items-center gap-3 mb-6">
               <div className="relative">
                 <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-xl blur-md" />
-                <img src={logo} alt="Etronix Logo" className="relative h-20 w-auto rounded-xl bg-white/10 backdrop-blur-sm p-2" />
+                <OptimizedImage src={logo} alt="Etronix Logo" className="relative h-20 w-auto rounded-xl bg-white/10 backdrop-blur-sm p-2" priority />
               </div>
               <div>
                 <h2 className="text-2xl font-black bg-linear-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">

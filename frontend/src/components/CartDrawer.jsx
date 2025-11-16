@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import OptimizedImage from './OptimizedImage';
 import { Link } from 'react-router-dom';
 
 export default function CartDrawer({ open, onClose }) {
@@ -112,12 +113,14 @@ export default function CartDrawer({ open, onClose }) {
                   {/* Imagen */}
                   <div className="w-20 h-20 shrink-0 bg-white rounded-lg overflow-hidden border border-gray-200">
                     {item.image ? (
-                      <img 
-                        src={item.image} 
+                      <OptimizedImage
+                        src={item.image}
                         alt={item.title}
                         className="w-full h-full object-cover"
                         loading="lazy"
                         decoding="async"
+                        srcSet={`${item.image} 1x, ${item.image.replace(/\.(webp|png|jpg|jpeg)$/i, '@2x.$1')} 2x`}
+                        sizes="(max-width: 768px) 80px, 160px"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">

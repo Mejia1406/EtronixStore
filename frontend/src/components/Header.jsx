@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import logo from "../assets/logoEtronix.webp";
+import OptimizedImage from "./OptimizedImage";
 
 export default function Header({ cartCount: cartCountProp, onToggleSidebar, onToggleCart }) {
   const [cartCount, setCartCount] = useState(cartCountProp ?? 0);
@@ -58,7 +59,7 @@ export default function Header({ cartCount: cartCountProp, onToggleSidebar, onTo
               <Link to="/" className="flex items-center gap-3 group">
                 <div className="relative">
                   <div className="absolute inset-0 bg-linear-to-r from-cyan-500/30 to-blue-500/30 rounded-xl blur-md" />
-                  <img src={logo} alt="Etronix" className="relative h-10 w-auto rounded-xl bg-white/10 backdrop-blur-sm p-1" loading="eager" decoding="async" />
+                  <OptimizedImage src={logo} alt="Etronix" className="relative h-10 w-auto rounded-xl bg-white/10 backdrop-blur-sm p-1" priority />
                 </div>
                 <div className="hidden md:block leading-tight">
                   <span className="text-2xl font-extrabold tracking-tight bg-linear-to-r from-cyan-400 via-blue-400 to-cyan-300 bg-clip-text text-transparent">
