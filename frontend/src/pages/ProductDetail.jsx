@@ -86,53 +86,36 @@ export default function ProductDetail() {
       <Helmet>
         <title>{productTitle}</title>
         <meta name="description" content={productDescription} />
-        <meta name="keywords" content={`${product.title}, ${product.category}, ${product.specs?.brand || ''}, accesorios celular, comprar online Colombia`} />
-        
-        {/* Open Graph */}
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta property="og:title" content={productTitle} />
         <meta property="og:description" content={productDescription} />
         <meta property="og:type" content="product" />
         <meta property="og:url" content={productUrl} />
-        <meta property="og:image" content={productImage} />
-        <meta property="product:price:amount" content={product.price} />
-        <meta property="product:price:currency" content="COP" />
-        <meta property="product:availability" content={product.stock > 0 ? 'in stock' : 'out of stock'} />
-        
-        {/* Twitter Card */}
+        <meta property="og:image" content={product.image || 'https://etronix-store.com/logo.png'} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={productTitle} />
         <meta name="twitter:description" content={productDescription} />
-        <meta name="twitter:image" content={productImage} />
-        
-        {/* Schema.org Product */}
-        <script type="application/ld+json">
-  {JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Inicio",
-        "item": `${SEO_CONFIG.siteUrl}/`
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Productos",
-        "item": `${SEO_CONFIG.siteUrl}/shop`
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": product.title,
-        "item": `${SEO_CONFIG.siteUrl}/products/${product._id}`
-      }
-    ]
-  })}
-</script>
-        
+        <meta name="twitter:image" content={product.image || 'https://etronix-store.com/logo.png'} />
         <link rel="canonical" href={productUrl} />
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Product",
+            "name": product?.title || "Producto Etronix",
+            "image": product?.image || "https://etronix-store.com/logo.png",
+            "description": productDescription,
+            "brand": {
+              "@type": "Brand",
+              "name": product?.specs?.brand || "Etronix"
+            },
+            "offers": {
+              "@type": "Offer",
+              "priceCurrency": "COP",
+              "price": product?.price || "",
+              "availability": product?.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+            }
+          })}
+        </script>
       </Helmet>
 
       {/* ⭐ CAMBIO: fondo global igual al de Home */}

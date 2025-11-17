@@ -4,6 +4,7 @@ import AdminLogin from "../components/AdminLogin";
 import { Helmet } from "react-helmet-async";
 import LightRays from "../components/LightRays";
 import ProductAdmin from "../components/ProductAdmin";
+import AdminDashboard from "../components/AdminDashboard";
 
 export default function Admin() {
   const [orders, setOrders] = useState([]);
@@ -14,7 +15,7 @@ export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminCode, setAdminCode] = useState("");
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [view, setView] = useState("orders"); // "orders" | "products"
+  const [view, setView] = useState("dashboard"); // "orders" | "products"
 
   // Ya no hay sesión persistente → siempre pide código
   useEffect(() => {
@@ -258,27 +259,43 @@ export default function Admin() {
             </div>
 
             <div className="flex items-center gap-3">
-              {view === "orders" ? (
+              <div className="flex gap-2">
                 <button
-                  onClick={() => setView("products")}
-                  className="px-4 py-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 text-white font-black shadow-lg hover:shadow-cyan-500/50 transition-all hover:-translate-y-0.5 flex items-center gap-2"
+                  onClick={() => setView("dashboard")}
+                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
+                    view === "dashboard"
+                      ? "bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg"
+                      : "bg-white/10 text-gray-300 hover:bg-white/20"
+                  }`}
                 >
-                  <span className="material-symbols-outlined text-lg">
-                    inventory_2
-                  </span>
-                  Gestión de Productos
+                  <span className="material-symbols-outlined text-lg">dashboard</span>
+                  Dashboard
                 </button>
-              ) : (
+                
                 <button
                   onClick={() => setView("orders")}
-                  className="px-4 py-2 rounded-xl bg-linear-to-r from-green-500 to-teal-500 text-white font-black shadow-lg hover:shadow-green-500/50 transition-all hover:-translate-y-0.5 flex items-center gap-2"
+                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
+                    view === "orders"
+                      ? "bg-linear-to-r from-green-500 to-teal-500 text-white shadow-lg"
+                      : "bg-white/10 text-gray-300 hover:bg-white/20"
+                  }`}
                 >
-                  <span className="material-symbols-outlined text-lg">
-                    receipt_long
-                  </span>
-                  Gestión de Pedidos
+                  <span className="material-symbols-outlined text-lg">receipt_long</span>
+                  Pedidos
                 </button>
-              )}
+                
+                <button
+                  onClick={() => setView("products")}
+                  className={`px-4 py-2 rounded-xl font-black transition-all flex items-center gap-2 ${
+                    view === "products"
+                      ? "bg-linear-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                      : "bg-white/10 text-gray-300 hover:bg-white/20"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-lg">inventory_2</span>
+                  Productos
+                </button>
+              </div>
 
               <button
                 onClick={fetchOrders}
@@ -314,7 +331,15 @@ export default function Admin() {
         </header>
 
         <main className="max-w-7xl mx-auto px-4 pb-12">
-          {view === "orders" ? (
+          {view === "dashboard" ? (
+            <div className="mt-8">
+              <div className="mb-8">
+                <h2 className="text-3xl font-black text-white mb-2">Dashboard</h2>
+                <p className="text-gray-400">Vista general de tu negocio</p>
+              </div>
+              <AdminDashboard adminCode={adminCode} />
+            </div>
+          ) : view === "orders" ? (
             <>
               {/* Estadísticas */}
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8 mt-8">

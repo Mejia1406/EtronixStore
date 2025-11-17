@@ -72,16 +72,19 @@ export default function AdminProductNew() {
       // Si solo hay una imagen y es válida, asegúrate que esté en array
       const productData = {
         ...form,
-        images: form.images.filter(img => img && img.trim() !== ""),
+        images: form.images.filter((img) => img && img.trim() !== ""),
       };
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-code": adminCode,
-        },
-        body: JSON.stringify(productData),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/products`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-admin-code": adminCode,
+          },
+          body: JSON.stringify(productData),
+        }
+      );
       if (res.ok) {
         // No borrar adminCode, solo redirigir
         navigate("/admin");
@@ -102,13 +105,43 @@ export default function AdminProductNew() {
           <title>Nuevo Producto | Admin | Etronix Store</title>
           <meta name="robots" content="noindex, nofollow" />
         </Helmet>
-        <h1 className="text-3xl font-black mb-8 text-cyan-400">Agregar Nuevo Producto</h1>
+        <h1 className="text-3xl font-black mb-8 text-cyan-400">
+          Agregar Nuevo Producto
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="title" value={form.title} onChange={handleChange} placeholder="Nombre" className="p-2 rounded bg-gray-800 text-white" required />
-            <input name="price" value={form.price} onChange={handleChange} placeholder="Precio" type="number" className="p-2 rounded bg-gray-800 text-white" required />
-            <input name="stock" value={form.stock} onChange={handleChange} placeholder="Stock" type="number" className="p-2 rounded bg-gray-800 text-white" required />
-            <select name="category" value={form.category} onChange={handleChange} className="p-2 rounded bg-gray-800 text-white">
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="Nombre"
+              className="p-2 rounded bg-gray-800 text-white"
+              required
+            />
+            <input
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              placeholder="Precio"
+              type="number"
+              className="p-2 rounded bg-gray-800 text-white"
+              required
+            />
+            <input
+              name="stock"
+              value={form.stock}
+              onChange={handleChange}
+              placeholder="Stock"
+              type="number"
+              className="p-2 rounded bg-gray-800 text-white"
+              required
+            />
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              className="p-2 rounded bg-gray-800 text-white"
+            >
               <option value="celulares">Celulares</option>
               <option value="audifonos">Audífonos</option>
               <option value="cargadores">Cargadores</option>
@@ -117,74 +150,138 @@ export default function AdminProductNew() {
               <option value="protectores">Protectores</option>
             </select>
           </div>
-          <textarea name="description" value={form.description} onChange={handleChange} placeholder="Descripción" className="p-2 rounded bg-gray-800 text-white w-full" />
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Descripción"
+            className="p-2 rounded bg-gray-800 text-white w-full"
+          />
           {/* Imágenes */}
           <div>
-            <label className="font-bold text-cyan-400 mb-2 block">Imágenes</label>
+            <label className="font-bold text-cyan-400 mb-2 block">
+              Imágenes
+            </label>
             {form.images.map((img, idx) => (
               <div key={idx} className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={img}
-                  onChange={e => handleImageChange(idx, e.target.value)}
+                  onChange={(e) => handleImageChange(idx, e.target.value)}
                   placeholder={`URL Imagen #${idx + 1}`}
                   className="p-2 rounded bg-gray-800 text-white flex-1"
                 />
-                <button type="button" onClick={() => handleRemoveImage(idx)} className="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveImage(idx)}
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                >
+                  Eliminar
+                </button>
               </div>
             ))}
-            <button type="button" onClick={handleAddImage} className="px-3 py-1 bg-cyan-500 text-white rounded font-bold">Agregar Imagen</button>
+            <button
+              type="button"
+              onClick={handleAddImage}
+              className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
+            >
+              Agregar Imagen
+            </button>
           </div>
           {/* Especificaciones */}
           <div>
-            <label className="font-bold text-cyan-400 mb-2 block">Especificaciones</label>
+            <label className="font-bold text-cyan-400 mb-2 block">
+              Especificaciones
+            </label>
             {form.specs.map((spec, idx) => (
               <div key={idx} className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={spec.key}
-                  onChange={e => handleArrayChange("specs", idx, "key", e.target.value)}
+                  onChange={(e) =>
+                    handleArrayChange("specs", idx, "key", e.target.value)
+                  }
                   placeholder="Campo (ej: Marca)"
                   className="p-2 rounded bg-gray-800 text-white flex-1"
                 />
                 <input
                   type="text"
                   value={spec.value}
-                  onChange={e => handleArrayChange("specs", idx, "value", e.target.value)}
+                  onChange={(e) =>
+                    handleArrayChange("specs", idx, "value", e.target.value)
+                  }
                   placeholder="Valor (ej: Samsung)"
                   className="p-2 rounded bg-gray-800 text-white flex-1"
                 />
-                <button type="button" onClick={() => handleRemoveArrayItem("specs", idx)} className="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveArrayItem("specs", idx)}
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                >
+                  Eliminar
+                </button>
               </div>
             ))}
-            <button type="button" onClick={() => handleAddArrayItem("specs", { key: "", value: "" })} className="px-3 py-1 bg-cyan-500 text-white rounded font-bold">Agregar Especificación</button>
+            <button
+              type="button"
+              onClick={() =>
+                handleAddArrayItem("specs", { key: "", value: "" })
+              }
+              className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
+            >
+              Agregar Especificación
+            </button>
           </div>
           {/* FAQs */}
           <div>
-            <label className="font-bold text-cyan-400 mb-2 block">Preguntas Frecuentes</label>
+            <label className="font-bold text-cyan-400 mb-2 block">
+              Preguntas Frecuentes
+            </label>
             {form.faqs.map((faq, idx) => (
               <div key={idx} className="flex gap-2 mb-2">
                 <input
                   type="text"
                   value={faq.question}
-                  onChange={e => handleArrayChange("faqs", idx, "question", e.target.value)}
+                  onChange={(e) =>
+                    handleArrayChange("faqs", idx, "question", e.target.value)
+                  }
                   placeholder="Pregunta"
                   className="p-2 rounded bg-gray-800 text-white flex-1"
                 />
                 <input
                   type="text"
                   value={faq.answer}
-                  onChange={e => handleArrayChange("faqs", idx, "answer", e.target.value)}
+                  onChange={(e) =>
+                    handleArrayChange("faqs", idx, "answer", e.target.value)
+                  }
                   placeholder="Respuesta"
                   className="p-2 rounded bg-gray-800 text-white flex-1"
                 />
-                <button type="button" onClick={() => handleRemoveArrayItem("faqs", idx)} className="px-2 py-1 bg-red-500 text-white rounded">Eliminar</button>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveArrayItem("faqs", idx)}
+                  className="px-2 py-1 bg-red-500 text-white rounded"
+                >
+                  Eliminar
+                </button>
               </div>
             ))}
-            <button type="button" onClick={() => handleAddArrayItem("faqs", { question: "", answer: "" })} className="px-3 py-1 bg-cyan-500 text-white rounded font-bold">Agregar Pregunta</button>
+            <button
+              type="button"
+              onClick={() =>
+                handleAddArrayItem("faqs", { question: "", answer: "" })
+              }
+              className="px-3 py-1 bg-cyan-500 text-white rounded font-bold"
+            >
+              Agregar Pregunta
+            </button>
           </div>
           {error && <div className="text-red-500 font-bold">{error}</div>}
-          <button type="submit" disabled={loading} className="w-full px-4 py-3 bg-cyan-500 text-white font-black rounded-xl mt-2">
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full px-4 py-3 bg-cyan-500 text-white font-black rounded-xl mt-2"
+          >
             {loading ? "Guardando..." : "Crear Producto"}
           </button>
         </form>

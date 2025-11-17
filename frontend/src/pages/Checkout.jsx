@@ -223,7 +223,7 @@ export default function Checkout() {
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-900 text-white">
       <Helmet>
         <title>Finalizar Compra | Etronix Store</title>
         <meta
@@ -234,6 +234,7 @@ export default function Checkout() {
           rel="canonical"
           href="https://etronix-store.com/checkout"
         />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       {/* Fondo */}
@@ -355,6 +356,6 @@ export default function Checkout() {
           )}
         </main>
       </div>
-    </>
+    </div>
   );
 }

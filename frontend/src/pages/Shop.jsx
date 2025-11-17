@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { CATEGORIES } from "../constants/categories";
+// import { CATEGORIES } from "../constants/categories";
 import { NoResults, ProductSkeleton } from "../components/EmptyState";
 import { Helmet } from "react-helmet-async";
 import OptimizedImage from '../components/OptimizedImage';
@@ -11,15 +11,17 @@ export default function Shop() {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  // const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toast, setToast] = useState("");
   const [page, setPage] = useState(1);
   const PRODUCTS_PER_PAGE = 12;
-  // paginatedProducts depende de filteredProducts, así que debe ir después de su declaración
   const paginatedProducts = filteredProducts.slice(0, page * PRODUCTS_PER_PAGE);
+   const [sortBy, setSortBy] = useState('newest');
+  const [priceRange, setPriceRange] = useState({ min: 0, max: 999999999 });
+  const [tempPriceRange, setTempPriceRange] = useState({ min: '', max: '' }); 
 
   useEffect(() => {
     (async () => {
@@ -35,9 +37,9 @@ export default function Shop() {
       }
     })();
 
-    const params = new URLSearchParams(location.search);
-    const cat = params.get('cat');
-    if (cat) setSelectedCategory(cat);
+    // const params = new URLSearchParams(location.search);
+    // const cat = params.get('cat');
+    // if (cat) setSelectedCategory(cat);
   }, [location.search]);
 
   useEffect(() => {
@@ -47,10 +49,6 @@ export default function Shop() {
 
   useEffect(() => {
     let filtered = products;
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(p => p.category === selectedCategory);
-    }
 
     if (debouncedQuery.trim()) {
       const query = debouncedQuery.toLowerCase();
@@ -64,7 +62,7 @@ export default function Shop() {
 
     setFilteredProducts(filtered);
     setPage(1); // Reinicia la paginación al filtrar
-  }, [selectedCategory, debouncedQuery, products]);
+  }, [debouncedQuery, products]);
 
   const addToCart = (p) => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -81,67 +79,94 @@ export default function Shop() {
     setToast('Producto agregado al carrito');
     setTimeout(() => setToast(""), 1800);
   };
+  const priceStats = products.length > 0 ? {
+    min: Math.min(...products.map(p => p.price)),
+    max: Math.max(...products.map(p => p.price))
+  } : { min: 0, max: 1000000 };
+  useEffect(() => {
+    let filtered = products;
+
+    if (debouncedQuery.trim()) {
+      const query = debouncedQuery.toLowerCase();
+      filtered = filtered.filter(p =>
+        p.title.toLowerCase().includes(query) ||
+        p.description?.toLowerCase().includes(query) ||
+        p.specs?.brand?.toLowerCase().includes(query) ||
+        p.category?.toLowerCase().includes(query)
+      );
+    }
+
+    // 🆕 Filtro por rango de precio
+    filtered = filtered.filter(p => 
+      p.price >= priceRange.min && p.price <= priceRange.max
+    );
+
+    // 🆕 Ordenamiento
+    switch (sortBy) {
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case 'name-asc':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'name-desc':
+        filtered.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case 'popular':
+        // Aquí podrías ordenar por ventas si tienes ese dato
+        filtered.sort((a, b) => (b.sold || 0) - (a.sold || 0));
+        break;
+      case 'newest':
+      default:
+        filtered.sort((a, b) => 
+          new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+        );
+    }
+
+    setFilteredProducts(filtered);
+    setPage(1);
+  }, [debouncedQuery, products, sortBy, priceRange]);
+
+  // 🆕 Aplicar filtro de precio
+  const applyPriceFilter = () => {
+    const min = tempPriceRange.min === '' ? 0 : Number(tempPriceRange.min);
+    const max = tempPriceRange.max === '' ? 999999999 : Number(tempPriceRange.max);
+    
+    if (min > max) {
+      alert('El precio mínimo no puede ser mayor al máximo');
+      return;
+    }
+    
+    setPriceRange({ min, max });
+  };
+
+  // 🆕 Limpiar filtro de precio
+  const clearPriceFilter = () => {
+    setTempPriceRange({ min: '', max: '' });
+    setPriceRange({ min: 0, max: 999999999 });
+  };
 
   return (
     <>
       <Helmet>
-        <title>
-          {selectedCategory === 'all'
-            ? 'Tienda de Accesorios | Etronix Store'
-            : `${CATEGORIES.find(c => c.id === selectedCategory)?.name} | Etronix Store`
-          }
-        </title>
-        <meta
-          name="description"
-          content={
-            selectedCategory === 'all'
-              ? 'Explora nuestro catálogo completo de accesorios tecnológicos: audífonos, cargadores, cables, protectores y más. Envío a toda Colombia.'
-              : `Compra ${CATEGORIES.find(c => c.id === selectedCategory)?.name} de alta calidad. Envío rápido y garantía extendida en todos los productos.`
-          }
-        />
-        <link rel="canonical" href={`https://etronix-store.com/shop${selectedCategory !== 'all' ? `?cat=${selectedCategory}` : ''}`} />
-
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "CollectionPage",
-            "name": selectedCategory === 'all'
-              ? 'Todos los Productos - Etronix Store'
-              : `${CATEGORIES.find(c => c.id === selectedCategory)?.name} - Etronix Store`,
-            "description": selectedCategory === 'all'
-              ? 'Catálogo completo de accesorios tecnológicos'
-              : `Productos de ${CATEGORIES.find(c => c.id === selectedCategory)?.name}`,
-            "url": `https://etronix-store.com/shop${selectedCategory !== 'all' ? `?cat=${selectedCategory}` : ''}`,
-            "mainEntity": {
-              "@type": "ItemList",
-              "numberOfItems": filteredProducts.length,
-              "itemListElement": filteredProducts.slice(0, 12).map((product, index) => ({
-                "@type": "ListItem",
-                "position": index + 1,
-                "item": {
-                  "@type": "Product",
-                  "name": product.title,
-                  "image": product.image || 'https://etronix-store.com/og-image.jpg',
-                  "description": product.description || product.title,
-                  "offers": {
-                    "@type": "Offer",
-                    "url": `https://etronix-store.com/products/${product._id}`,
-                    "priceCurrency": "COP",
-                    "price": product.price,
-                    "availability": product.stock > 0
-                      ? "https://schema.org/InStock"
-                      : "https://schema.org/OutOfStock",
-                    "seller": {
-                      "@type": "Organization",
-                      "name": "Etronix Store"
-                    }
-                  }
-                }
-              }))
-            }
-          })}
-        </script>
+        <title>Tienda de Accesorios | Etronix Store</title>
+        <meta name="description" content="Explora nuestro catálogo completo de accesorios tecnológicos: audífonos, cargadores, cables, protectores y más. Envío a toda Colombia." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content="Tienda | Etronix Store" />
+        <meta property="og:description" content="Compra accesorios y tecnología premium en Colombia. Garantía, envíos rápidos y atención personalizada." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://etronix-store.com/shop" />
+        <meta property="og:image" content={'https://etronix-store.com/logo.png'} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Tienda | Etronix Store" />
+        <meta name="twitter:description" content="Compra accesorios y tecnología premium en Colombia. Garantía, envíos rápidos y atención personalizada." />
+        <meta name="twitter:image" content={'https://etronix-store.com/logo.png'} />
+        <link rel="canonical" href="https://etronix-store.com/shop" />
       </Helmet>
+      // ...existing code...
 
       {/* === Fondo LightRays: ocupa toda la pantalla === */}
       <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black">
@@ -160,9 +185,7 @@ export default function Shop() {
                     Catálogo de Productos
                   </h1>
                   <p className="text-gray-300 text-lg">
-                    {selectedCategory === 'all'
-                      ? 'Explora nuestra selección completa de accesorios tecnológicos'
-                      : `Categoría: ${CATEGORIES.find(c => c.id === selectedCategory)?.name}`}
+                    Explora nuestra selección completa de accesorios tecnológicos
                   </p>
                 </div>
 
@@ -199,70 +222,65 @@ export default function Shop() {
                 </div>
               </div>
 
-              {/* Botón categorías móvil */}
-              <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden mb-6 flex items-center gap-2 px-5 py-3 -bg-white/10 rounded-xl border-2 border-white/20 hover:border-cyan-400/50 transition-all font-bold text-white"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-                Categorías
-              </button>
+              {/* 🆕 Barra de Ordenamiento y Filtros */}
+              <div className="flex flex-col md:flex-row gap-4 mb-6">
+                {/* Ordenar por */}
+                <div className="flex-1">
+                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                    Ordenar por
+                  </label>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-white/10 border-2 border-white/20 focus:border-cyan-400/50 transition-all outline-none text-white font-medium"
+                  >
+                    <option value="newest" className="bg-gray-900">Más recientes</option>
+                    <option value="price-asc" className="bg-gray-900">Precio: Menor a Mayor</option>
+                    <option value="price-desc" className="bg-gray-900">Precio: Mayor a Menor</option>
+                    <option value="name-asc" className="bg-gray-900">Nombre: A-Z</option>
+                    <option value="name-desc" className="bg-gray-900">Nombre: Z-A</option>
+                    <option value="popular" className="bg-gray-900">Más Populares</option>
+                  </select>
+                </div>
+
+                {/* Filtro de Precio */}
+                <div className="flex-1">
+                  <label className="block text-sm font-bold text-gray-300 mb-2">
+                    Rango de Precio
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      placeholder={`Min $${priceStats.min.toLocaleString('es-CO')}`}
+                      value={tempPriceRange.min}
+                      onChange={(e) => setTempPriceRange(prev => ({ ...prev, min: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border-2 border-white/20 focus:border-cyan-400/50 transition-all outline-none text-white font-medium"
+                    />
+                    <input
+                      type="number"
+                      placeholder={`Max $${priceStats.max.toLocaleString('es-CO')}`}
+                      value={tempPriceRange.max}
+                      onChange={(e) => setTempPriceRange(prev => ({ ...prev, max: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl bg-white/10 border-2 border-white/20 focus:border-cyan-400/50 transition-all outline-none text-white font-medium"
+                    />
+                    <button
+                      onClick={applyPriceFilter}
+                      className="px-6 py-3 rounded-xl bg-cyan-500 text-white font-black hover:bg-cyan-400 transition-all"
+                    >
+                      Filtrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* ...existing code... */}
+
+              {/* ...existing code... */}
             </div>
 
             <div className="flex gap-8">
 
-              {/* Sidebar de Categorías */}
-              <aside className={`${sidebarOpen ? 'block' : 'hidden'} md:block w-full md:w-72 shrink-0`}>
-                <div className="bg-linear-to-br from-white/15 to-white/5 rounded-2xl border border-white/20 p-6 sticky top-24 shadow-xl">
-                  <h2 className="font-black text-xl text-white mb-6 flex items-center gap-2">
-                    <svg className="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                    </svg>
-                    Categorías
-                  </h2>
-
-                  <nav className="space-y-2">
-                    {CATEGORIES.map(cat => {
-                      const count = cat.id === 'all'
-                        ? products.length
-                        : products.filter(p => p.category === cat.id).length;
-
-                      return (
-                        <button
-                          key={cat.id}
-                          onClick={() => {
-                            setSelectedCategory(cat.id);
-                            setSidebarOpen(false);
-                          }}
-                          className={`
-                            w-full text-left px-4 py-3.5 rounded-xl transition-all flex items-center justify-between group font-bold
-                            ${selectedCategory === cat.id
-                              ? 'bg-linear-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/30'
-                              : 'hover:bg-white/10 text-gray-300 hover:text-white border border-transparent hover:border-white/20'
-                            }
-                          `}
-                        >
-                          <span className="flex items-center gap-3">
-                            <span className="text-xl">{cat.icon}</span>
-                            <span>{cat.name}</span>
-                          </span>
-                          <span className={`
-                            text-xs px-2.5 py-1 rounded-full font-black
-                            ${selectedCategory === cat.id
-                              ? 'bg-white/20 text-white'
-                              : 'bg-white/10 text-gray-300 group-hover:bg-cyan-400/20 group-hover:text-cyan-300'
-                            }
-                          `}>
-                            {count}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </nav>
-                </div>
-              </aside>
+              {/* ...existing code... */}
 
               {/* Productos */}
               <div className="flex-1">
@@ -324,7 +342,7 @@ export default function Shop() {
                             <div className="flex-1">
                               {p.category && (
                                 <span className="inline-block px-3 py-1 rounded-lg bg-cyan-500/20 border border-cyan-400/30 text-cyan-300 text-xs font-black mb-3">
-                                  {CATEGORIES.find(c => c.id === p.category)?.icon} {CATEGORIES.find(c => c.id === p.category)?.name || p.category}
+                                  {p.category}
                                 </span>
                               )}
                               <h3 className="font-black text-xl mb-2 text-white line-clamp-2">

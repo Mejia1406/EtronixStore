@@ -7,6 +7,7 @@ export default function FAQPage() {
       <Helmet>
         <title>Preguntas Frecuentes - Etronix Store | Ayuda y Soporte</title>
         <meta name="description" content="Encuentra respuestas sobre envíos, pagos, garantías y más. Resolvemos todas tus dudas sobre compras en Etronix Store." />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="keywords" content="preguntas frecuentes, ayuda etronix, envíos colombia, garantías productos, métodos de pago" />
         
         {/* Open Graph */}
@@ -14,6 +15,7 @@ export default function FAQPage() {
         <meta property="og:description" content="Resuelve todas tus dudas sobre nuestros productos y servicios" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://etronix-store.com/faq" />
+        <meta property="og:image" content="https://etronix-store.com/logo.png" />
         
         {/* Schema.org FAQPage */}
         <script type="application/ld+json">

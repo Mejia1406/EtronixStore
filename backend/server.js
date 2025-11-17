@@ -245,6 +245,10 @@ async function normalizeItemsFromDB(items) {
   return { items: normalized, total };
 }
 
+// --- Estadísticas para dashboard admin ---
+import statsRouter from "./src/routes/stats.js";
+app.use("/api/stats", statsRouter);
+
 // --- Productos ---
 app.get("/api/products", asyncHandler(async (req, res) => {
   // Cache en memoria simple (en producción usar Redis)
@@ -763,6 +767,16 @@ app.get("/api/orders", requireAdmin, asyncHandler(async (req, res) => {
       pages: Math.ceil(total / Number(limit)),
     }
   });
+}));
+
+// --- Actualizar estado de orden ---
+app.patch("/api/orders/:id", requireAdmin, validate(updateOrderStatusSchema), asyncHandler(async (req, res) => {
+  const { status } = req.body;
+  const order = await Order.findById(req.params.id);
+  if (!order) throw new NotFoundError("Orden");
+  order.status = status;
+  await order.save();
+  res.json(order);
 }));
 
 // --- Consultar producto por ID ---

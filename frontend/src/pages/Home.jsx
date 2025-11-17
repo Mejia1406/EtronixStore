@@ -141,7 +141,17 @@ export default function Home() {
        <Helmet>
         <title>{seoData.title}</title>
         <meta name="description" content={seoData.description} />
-        <link rel="canonical" href={seoData.canonical} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta property="og:title" content={seoData.title} />
+        <meta property="og:description" content={seoData.description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://etronix-store.com/" />
+        <meta property="og:image" content={seoData.image || 'https://etronix-store.com/logo.png'} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoData.title} />
+        <meta name="twitter:description" content={seoData.description} />
+        <meta name="twitter:image" content={seoData.image || 'https://etronix-store.com/logo.png'} />
+        <link rel="canonical" href="https://etronix-store.com/" />
         
         {/* Open Graph */}
         <meta property="og:title" content={seoData.openGraph.title} />
@@ -179,6 +189,39 @@ export default function Home() {
             }
           })}
         </script>
+        <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Etronix",
+      "url": "https://etronix-store.com/",
+      "description": "Etronix es una tienda online especializada en accesorios y tecnología premium para celulares en Colombia. Ofrecemos garantía extendida, envíos rápidos y atención personalizada todos los días.",
+      "contactPoint": [{
+        "@type": "ContactPoint",
+        "telephone": "+57-3207208410",
+        "contactType": "customer service",
+        "availableLanguage": ["Spanish"]
+      }],
+      "sameAs": [
+        "https://instagram.com/Etronix2025"
+      ]
+    })}
+  </script>
+  <script type="application/ld+json">
+    {JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Store",
+      "name": "Etronix",
+      "image": "https://etronix-store.com/logo.png",
+      "url": "https://etronix-store.com/",
+      "telephone": "+57-3207208410",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "CO"
+      },
+      "openingHours": "Todos los días"
+    })}
+  </script>
       </Helmet>
 
       {/* ✅ Fondo SIMPLE primero (sin WebGL) */}
