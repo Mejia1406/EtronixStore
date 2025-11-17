@@ -1,19 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from 'recharts';
+// import { ResponsiveLine } from '@nivo/line';
+// import { ResponsivePie } from '@nivo/pie';
 
 export default function AdminDashboard({ adminCode }) {
   const [stats, setStats] = useState(null);
@@ -102,35 +89,10 @@ export default function AdminDashboard({ adminCode }) {
             <span className="material-symbols-outlined text-cyan-400">show_chart</span>
             Ventas Últimos 30 Días
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={salesChart}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#ffffff20" />
-              <XAxis dataKey="date" stroke="#ffffff80" />
-              <YAxis stroke="#ffffff80" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #334155',
-                  borderRadius: '8px'
-                }}
-              />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="revenue"
-                stroke="#06b6d4"
-                strokeWidth={2}
-                name="Ingresos"
-              />
-              <Line
-                type="monotone"
-                dataKey="orders"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                name="Órdenes"
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          <div className="flex justify-center items-center h-[300px] text-gray-400">
+            {/* Gráfico desactivado temporalmente */}
+            <span>Gráfico desactivado</span>
+          </div>
         </div>
 
         {/* Ventas por categoría */}
@@ -139,31 +101,10 @@ export default function AdminDashboard({ adminCode }) {
             <span className="material-symbols-outlined text-cyan-400">pie_chart</span>
             Ventas por Categoría
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={categoryStats}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={(entry) => entry._id || 'Sin categoría'}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="revenue"
-              >
-                {categoryStats.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1e293b',
-                  border: '1px solid #334155',
-                  borderRadius: '8px'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+          <div className="flex justify-center items-center h-[300px] text-gray-400">
+            {/* Gráfico desactivado temporalmente */}
+            <span>Gráfico desactivado</span>
+          </div>
         </div>
       </div>
 
