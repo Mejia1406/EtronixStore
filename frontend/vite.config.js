@@ -1,4 +1,4 @@
-// frontend/vite.config.js - REEMPLAZAR TODO EL CONTENIDO
+// frontend/vite.config.js
 
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -7,7 +7,6 @@ import viteCompression from 'vite-plugin-compression'
 export default defineConfig({
   plugins: [
     react({
-      // ✅ Configuración simplificada sin plugins extra
       babel: {
         compact: true,
         plugins: [
@@ -24,41 +23,12 @@ export default defineConfig({
 
   build: {
     target: 'es2020',
-    minify: 'terser',
-    
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-        pure_funcs: ['console.log', 'console.info'],
-        passes: 2,
-      },
-      mangle: {
-        safari10: true
-      },
-    },
+    minify: false,   // mantenlo así mientras probamos
 
     rollupOptions: {
+      // ❌ ELIMINAMOS manualChunks COMPLETO
+      // output: {...} queda solo con filename
       output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
-            if (id.includes('react/') || id.includes('react-dom/')) {
-              return 'react-vendor';
-            }
-            if (id.includes('react-router')) {
-              return 'router';
-            }
-            if (id.includes('react-helmet')) {
-              return 'helmet';
-            }
-            return 'vendor';
-          }
-          
-          if (id.includes('/pages/Admin')) return 'admin';
-          if (id.includes('/pages/Checkout')) return 'checkout';
-          if (id.includes('/pages/Shop')) return 'shop';
-        },
-        
         chunkFileNames: 'js/[name]-[hash:8].js',
       },
 
@@ -79,4 +49,4 @@ export default defineConfig({
       target: 'es2020',
     }
   }
-});
+})
