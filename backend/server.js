@@ -840,6 +840,6 @@ app.use(errorHandler);
 
 // --- Server ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  logger.info(`Backend corriendo en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Backend corriendo en puerto ${PORT}`);
 });
