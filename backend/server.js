@@ -33,6 +33,8 @@ import compression from 'compression';
 dotenv.config();
 
 const app = express();
+// Render/Heroku/Cloud: confiar en el proxy para X-Forwarded-For
+app.set('trust proxy', 1);
 
 // --- Seguridad ---
 // Helmet para headers de seguridad
