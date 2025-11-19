@@ -28,10 +28,14 @@ export default function Shop() {
       try {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/products`);
         const data = await res.json();
-        setProducts(data);
-        setFilteredProducts(data);
+        // Asegura que data sea un array
+        const productsArray = Array.isArray(data) ? data : [];
+        setProducts(productsArray);
+        setFilteredProducts(productsArray);
       } catch (error) {
         console.error("Error cargando productos:", error);
+        setProducts([]);
+        setFilteredProducts([]);
       } finally {
         setLoading(false);
       }
