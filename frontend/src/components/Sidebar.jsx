@@ -1,3 +1,18 @@
+// Preload de rutas para navegación instantánea
+const preloadRoute = (route) => {
+  switch (route) {
+    case '/':
+      import('../pages/Home.jsx'); break;
+    case '/shop':
+      import('../pages/Shop.jsx'); break;
+    case '/faq':
+      import('../pages/FAQPage.jsx'); break;
+    case '/about':
+      import('../pages/About.jsx'); break;
+    default:
+      break;
+  }
+};
 import { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { CATEGORIES } from "../constants/categories";
@@ -17,11 +32,6 @@ export default function Sidebar({ open = false, onClose }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Cerrar si cambia de ruta
-  useEffect(() => {
-    if (open) onClose?.();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
 
   const goToCategory = (catId) => {
     const params = new URLSearchParams(location.search);
@@ -46,7 +56,7 @@ export default function Sidebar({ open = false, onClose }) {
       {/* Overlay con blur */}
       <div
         className={`
-          fixed inset-0 z-40 transition-opacity duration-300
+          fixed inset-0 z-40 transition-opacity duration-100
           ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}
         `}
         aria-hidden="true"
@@ -59,9 +69,10 @@ export default function Sidebar({ open = false, onClose }) {
       <aside
         className={`
           fixed top-0 left-0 z-50 h-screen w-80 max-w-[92vw]
-          transform transition-transform duration-300
+          transform transition-transform duration-150
           ${open ? "translate-x-0" : "-translate-x-full"}
         `}
+        style={{ willChange: 'transform' }}
         aria-label="Menú lateral"
         role="dialog"
         aria-modal="true"
@@ -116,6 +127,7 @@ export default function Sidebar({ open = false, onClose }) {
                       className={({ isActive }) =>
                         `${itemBase} ${isActive ? itemActive : itemInactive}`
                       }
+                      onMouseEnter={() => preloadRoute('/')}
                     >
                       <span className="material-symbols-outlined text-xl">home</span>
                       <span>Inicio</span>
@@ -126,6 +138,7 @@ export default function Sidebar({ open = false, onClose }) {
                     {/* Botón principal productos */}
                     <button
                       onClick={() => setProductsOpen((s) => !s)}
+                      onMouseEnter={() => preloadRoute('/shop')}
                       className={`${itemBase} w-full justify-between ${
                         location.pathname.startsWith("/shop") ? itemActive : itemInactive
                       }`}
@@ -161,6 +174,7 @@ export default function Sidebar({ open = false, onClose }) {
                         <li className="mt-2">
                           <button
                             onClick={() => goToCategory("all")}
+                            onMouseEnter={() => preloadRoute('/shop')}
                             className={`${itemBase} ${itemInactive} w-full justify-start text-[13px]`}
                           >
                             <span className="material-symbols-outlined text-[18px] text-gray-400">
@@ -190,6 +204,7 @@ export default function Sidebar({ open = false, onClose }) {
                       className={({ isActive }) =>
                         `${itemBase} ${isActive ? itemActive : itemInactive}`
                       }
+                      onMouseEnter={() => preloadRoute('/faq')}
                     >
                       <span className="material-symbols-outlined text-xl">live_help</span>
                       <span>Preguntas Frecuentes</span>
@@ -202,6 +217,7 @@ export default function Sidebar({ open = false, onClose }) {
                       className={({ isActive }) =>
                         `${itemBase} ${isActive ? itemActive : itemInactive}`
                       }
+                      onMouseEnter={() => preloadRoute('/about')}
                     >
                       <span className="material-symbols-outlined text-xl">info</span>
                       <span>Nosotros</span>

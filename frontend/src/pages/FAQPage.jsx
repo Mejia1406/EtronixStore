@@ -9,14 +9,12 @@ export default function FAQPage() {
         <meta name="description" content="Encuentra respuestas sobre envíos, pagos, garantías y más. Resolvemos todas tus dudas sobre compras en Etronix Store." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="keywords" content="preguntas frecuentes, ayuda etronix, envíos colombia, garantías productos, métodos de pago" />
-        
         {/* Open Graph */}
         <meta property="og:title" content="Preguntas Frecuentes - Etronix Store" />
         <meta property="og:description" content="Resuelve todas tus dudas sobre nuestros productos y servicios" />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://etronix-store.com/faq" />
         <meta property="og:image" content="https://etronix-store.com/logo.png" />
-        
         {/* Schema.org FAQPage */}
         <script type="application/ld+json">
           {JSON.stringify({
@@ -58,12 +56,15 @@ export default function FAQPage() {
             ]
           })}
         </script>
-        
         <link rel="canonical" href="https://etronix-store.com/faq" />
       </Helmet>
-      <div id="faq">
-        <FAQ />
-      </div>
+      {/* Fondo igual que el resto */}
+      <div className="fixed inset-0 w-full h-full z-0 bg-linear-to-br from-gray-900 via-slate-900 to-black" />
+      <section className="relative min-h-screen flex items-center justify-center z-10 py-16">
+        <div className="max-w-4xl w-full mx-auto bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 p-10 text-white">
+          <FAQ />
+        </div>
+      </section>
     </>
   );
 }

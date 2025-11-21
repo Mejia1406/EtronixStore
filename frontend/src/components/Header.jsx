@@ -4,7 +4,7 @@ import logoEtronix from "../assets/logoEtronix.webp";
 import { useEffect, useState } from "react";
 import { ShoppingCart, Menu, X } from "lucide-react";
 
-export default function Header() {
+export default function Header({ onToggleSidebar }) {
   const location = useLocation();
   const [cart, setCart] = useState([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -57,9 +57,24 @@ export default function Header() {
         {/* lineare sutil en el borde inferior */}
         <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-linear-to-r from-transparent via-cyan-500/50 to-transparent" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-0 sm:px-0 lg:px-0">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
+            {/* Botón hamburguesa a la izquierda */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                className="relative group mr-4"
+                aria-label="Abrir menú lateral"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (typeof onToggleSidebar === 'function') onToggleSidebar();
+                }}
+              >
+                <div className="relative bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 p-2.5 rounded-full transition-all group-hover:border-cyan-400/50">
+                  <Menu className="w-5 h-5 text-gray-300 group-hover:text-cyan-400 transition-colors" />
+                </div>
+              </button>
+              {/* Logo */}
               <Link
                 to="/"
                 className="flex items-center gap-2 group relative z-10"
@@ -67,36 +82,36 @@ export default function Header() {
                 <img
                   src={logoEtronix}
                   alt="Logo Etronix"
-                  className="w-16 h-16"
+                  className="w-[90px] h-[70px]"
                 />
                 <span className="font-black text-xl bg-linear-to-r from-white via-cyan-100 to-blue-100 bg-clip-text text-transparent">
                   ETRONIX
                 </span>
               </Link>
+            </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
+            <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`relative font-bold text-sm transition-colors group ${
-                    location.pathname === link.to
+                  className={`relative font-bold text-sm transition-colors group ${location.pathname === link.to
                       ? "text-cyan-400"
                       : "text-gray-300 hover:text-white"
-                  }`}
+                    }`}
                 >
                   {link.label}
                   <span
-                    className={`absolute -bottom-1 left-0 w-full h-0.5 bg-linear-to-r from-cyan-400 to-blue-500 transform origin-left transition-transform ${
-                      location.pathname === link.to
+                    className={`absolute -bottom-1 left-0 w-full h-0.5 bg-linear-to-r from-cyan-400 to-blue-500 transform origin-left transition-transform ${location.pathname === link.to
                         ? "scale-x-100"
                         : "scale-x-0 group-hover:scale-x-100"
-                    }`}
+                      }`}
                   />
                 </Link>
               ))}
             </nav>
+
 
             {/* Actions */}
             <div className="flex items-center gap-4">
